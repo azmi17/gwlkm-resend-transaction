@@ -17,12 +17,15 @@ func NewRetransactionRepo() RetransactionRepo {
 type retransactionRepoImpl struct {
 }
 
-func (r *retransactionRepoImpl) RecycleTransaction(dataTrans entities.TransHisotry) (isoMsg string, err error) {
+func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.TransHisotry) (err error) {
 
-	//TODO: Send datatrans to ip & port target
+	//TODO: Send datatrans to ip & port gwlkm
 
 	repo, _ := datatransrepo.NewDatatransRepo()
-	coreAddr, _ := repo.GetServeAddr(dataTrans.BankCode)
+	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
+	if err != nil {
+		entities.PrintError(err.Error())
+	}
 
 	// TCP OBJ INIT..
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 30)
@@ -43,12 +46,15 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans entities.TransHisot
 			entities.PrintError(err.Error())
 			return
 		}
+		// Override below:
+		dataTrans.ResponseCode = isoUnMarshal.GetField(39)
+		dataTrans.Msg = isoUnMarshal.GetField(48)
 		isoUnMarshal.PrettyPrint()
 	} else {
-		return isoMsg, errors.New(fmt.Sprint("re-transaciton failed: ", st.Message))
+		return errors.New(fmt.Sprint("re-transaciton failed: ", st.Message))
 	}
 
-	return
+	return nil
 }
 
 /*

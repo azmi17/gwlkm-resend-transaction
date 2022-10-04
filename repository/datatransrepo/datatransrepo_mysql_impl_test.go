@@ -2,7 +2,6 @@ package datatransrepo
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"testing"
@@ -65,8 +64,6 @@ func TestGetData(t *testing.T) {
 		// if rc != "0000" {
 
 		// }
-	} else {
-		errors.New(fmt.Sprint("re-transaciton failed: ", st.Message))
 	}
 
 }

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/repository/datatransrepo"
 	"gwlkm-resend-transaction/repository/retransactionepo"
@@ -26,7 +27,10 @@ func (e *retransactionUsecase) ResendTransaction(stan string) (er error) {
 	}
 
 	reTransRepo := retransactionepo.NewRetransactionRepo()
-	reTransRepo.RecycleTransaction(data)
-	// return reTransRepo.RecycleTransaction(data)
-	return nil
+	reTransRepo.RecycleTransaction(&data)
+	if data.ResponseCode != "0000" {
+		return errors.New(data.Msg)
+	} else {
+		return nil
+	}
 }

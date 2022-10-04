@@ -16,15 +16,10 @@ package router
 
 import (
 	"gwlkm-resend-transaction/delivery/handler"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterHandler(router *gin.Engine) {
-	router.GET("/version", func(c *gin.Context) {
-		c.String(http.StatusOK, "Router Template V0.0.0")
-	})
-	router.GET("/list", handler.GetEmployeListHandler)
-	router.POST("/employee", handler.GetEmployee)
+	router.POST("/retransaction", handler.ResendTransByStan)
 }
