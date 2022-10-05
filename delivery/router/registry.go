@@ -21,5 +21,12 @@ import (
 )
 
 func RegisterHandler(router *gin.Engine) {
-	router.POST("/retransaction", handler.ResendTransByStan)
+
+	// API Versioning:
+	apiv1 := router.Group("api/v1")
+
+	// API Endpoint:
+	apiv1.GET("/version", handler.AppInfo)
+	apiv1.POST("/retransaction", handler.ResendTransByStan)
+	apiv1.POST("/reversedtrans", handler.ResendReversedTransByStan)
 }

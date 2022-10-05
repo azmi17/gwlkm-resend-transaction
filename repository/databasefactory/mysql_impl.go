@@ -26,7 +26,7 @@ func (m *mysqlImpl) Connect() error {
 	//Mysql Connection String Format : [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 	//Example : root:123456@tcp(127.0.0.1:3306)/employees?charset=utf8
 	connectionString := fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?charset=utf8",
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
 		os.Getenv(m.prefix+"mysql.username"),
 		os.Getenv(m.prefix+"mysql.password"),
 		os.Getenv(m.prefix+"mysql.address"),

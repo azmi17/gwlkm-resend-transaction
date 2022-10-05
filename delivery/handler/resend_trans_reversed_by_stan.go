@@ -9,14 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ResendTransByStan(ctx *gin.Context) {
+func ResendReversedTransByStan(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx) // catch request
 
 	payload := entities.TransHistoryRequest{}
 	httpio.Bind(&payload)
 
 	usecase := usecase.NewRetransactionUsecase()
-	er := usecase.ResendTransaction(payload.Stan)
+	er := usecase.ResendReversedTransaction(payload.Stan)
 
 	resp := entities.TransHistoryResponse{}
 	if er != nil {
