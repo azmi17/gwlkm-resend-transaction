@@ -105,10 +105,6 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (refStan s
 		return refStan, er
 	}
 
-	// if newTrx.Ref_Stan == reversedData.Stan {
-	// 	return refStan, err.DuplicateEntry
-	// }
-
 	// Extracting TransHistory into MsgTransHistory..
 	isoMsg := entities.MsgTransHistory{
 		MTI:      cpy.Mti,
