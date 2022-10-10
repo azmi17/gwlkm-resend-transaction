@@ -10,3 +10,9 @@ var (
 	SQLid_raw                      myutils.FieldInt
 	SQLno_hp_alternatif            myutils.FieldString
 )
+
+var (
+	Success = "0000"
+	Pending = "1234"
+	Failed  = "1100"
+)

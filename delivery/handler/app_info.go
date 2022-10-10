@@ -18,7 +18,6 @@ func AppInfo(ctx *gin.Context) {
 		"App Description": os.Getenv("application.desc"),
 		"App Version":     os.Getenv("application.version"),
 		"App Author":      os.Getenv("application.author"),
-		"Port Listener":   os.Getenv("app.listener_port"),
 	}
 
 	httpio.Response(http.StatusOK, appInfo)

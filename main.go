@@ -35,9 +35,11 @@ func init() {
 func LoadConfiguration(isReload bool) {
 	var er error
 	if isReload {
+		_ = glg.Log("e-Channel Recycle Transaction Service")
 		_ = glg.Log("Reloading configuration file...")
 		er = godotenv.Overload(".env")
 	} else {
+		_ = glg.Log("e-Channel Recycle Transaction Service")
 		_ = glg.Log("Loading configuration file...")
 		er = godotenv.Load(".env")
 	}
@@ -89,6 +91,7 @@ func PrepareDatabase() {
 	}
 
 	_ = glg.Log("Database Connected")
+	_ = glg.Log("Service Started")
 }
 
 func ReloadObserver() {

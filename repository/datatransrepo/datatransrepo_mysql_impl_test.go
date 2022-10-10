@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/helper"
+	"gwlkm-resend-transaction/repository/constant"
 	"log"
 	"testing"
 	"time"
@@ -115,8 +116,8 @@ func TestReversedData(t *testing.T) {
 
 	// RE-COMPOSE
 	newTrx := entities.TransHistory{}
-	newTrx.Stan = "RT" + reversedData.Stan[2:12]   // thinking abt it
-	newTrx.Tgl_Trans_Str = helper.GetCurrentDate() // thinking abt it
+	newTrx.Stan = "RT" + reversedData.Stan[2:12]
+	newTrx.Tgl_Trans_Str = helper.GetCurrentDate()
 	newTrx.Bank_Code = reversedData.Bank_Code
 	newTrx.Rek_Id = reversedData.Rek_Id
 	newTrx.Mti = reversedData.Mti
@@ -139,7 +140,6 @@ func TestReversedData(t *testing.T) {
 	newTrx.Msg = reversedData.Msg
 	newTrx.Msg_Response = reversedData.Msg_Response
 	newTrx.Bit39_Bit48_Hulu = reversedData.Bit39_Bit48_Hulu
-	newTrx.Time_Stamp = time.Now()
 	newTrx.Saldo_Before_Trans = reversedData.Saldo_Before_Trans
 	newTrx.Keterangan = reversedData.Keterangan
 	newTrx.Ref = reversedData.Ref
@@ -165,7 +165,7 @@ func TestReversedData(t *testing.T) {
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeRcOnReversedData(reversedData.Stan)
+	err = dataTransRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -240,7 +240,6 @@ func TestReversedDataTwo(t *testing.T) {
 	newTrx.Msg = reversedData.Msg
 	newTrx.Msg_Response = reversedData.Msg_Response
 	newTrx.Bit39_Bit48_Hulu = reversedData.Bit39_Bit48_Hulu
-	newTrx.Time_Stamp = time.Now()
 	newTrx.Saldo_Before_Trans = reversedData.Saldo_Before_Trans
 	newTrx.Keterangan = reversedData.Keterangan
 	newTrx.Ref = reversedData.Ref
@@ -266,7 +265,7 @@ func TestReversedDataTwo(t *testing.T) {
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeRcOnReversedData(reversedData.Stan)
+	err = dataTransRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

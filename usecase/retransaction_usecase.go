@@ -4,13 +4,14 @@ import (
 	"errors"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/helper"
+	"gwlkm-resend-transaction/repository/constant"
 	"gwlkm-resend-transaction/repository/datatransrepo"
 	"gwlkm-resend-transaction/repository/retransactionepo"
 )
 
 type RetransactionUsecase interface {
 	ResendTransaction(stan string) error
-	ResendReversedTransaction(stan string) error
+	ResendReversedTransaction(stan string) (string, error)
 }
 
 type retransactionUsecase struct{}
@@ -23,11 +24,15 @@ func (r *retransactionUsecase) ResendTransaction(stan string) (er error) {
 
 	var data entities.MsgTransHistory
 
+	// INIT REPOSITORY BANK DATA
 	dataRepo, _ := datatransrepo.NewDatatransRepo()
+
+	// CALL DATA BY STAN
 	if data, er = dataRepo.GetData(stan); er != nil {
 		return er
 	}
 
+	// CALL RECYCLE TRANSACTION
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleTransaction(&data)
 	if data.ResponseCode != "0000" {
@@ -37,21 +42,24 @@ func (r *retransactionUsecase) ResendTransaction(stan string) (er error) {
 	}
 }
 
-func (r *retransactionUsecase) ResendReversedTransaction(stan string) (er error) {
+func (r *retransactionUsecase) ResendReversedTransaction(stan string) (refStan string, er error) {
 
 	var reversedData entities.TransHistory
 
+	// INIT REPOSITORY BANK DATA
 	dataRepo, _ := datatransrepo.NewDatatransRepo()
 
-	// CALL REVERSED DATA
+	// CALL REVERSED DATA BY STAN
 	if reversedData, er = dataRepo.GetReversedData(stan); er != nil {
-		return er
+		return refStan, er
 	}
 
-	// Re-Compose Below:
+	// RECOMPOSING FOR DUPLICATE PROCS
 	newTrx := entities.TransHistory{}
-	newTrx.Stan = "RT" + reversedData.Stan[2:12]   // thinking abt it
-	newTrx.Tgl_Trans_Str = helper.GetCurrentDate() // thinking abt it
+	newTrx.Stan = helper.GenerateSTAN()
+	newTrx.Ref_Stan = reversedData.Stan
+	newTrx.Tgl_Trans_Str = helper.GetCurrentDate()
+	// newTrx.Tgl_Trans_Str = reversedData.Tgl_Trans_Str
 	newTrx.Bank_Code = reversedData.Bank_Code
 	newTrx.Rek_Id = reversedData.Rek_Id
 	newTrx.Mti = reversedData.Mti
@@ -76,7 +84,7 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (er error)
 	newTrx.Bit39_Bit48_Hulu = reversedData.Bit39_Bit48_Hulu
 	newTrx.Saldo_Before_Trans = reversedData.Saldo_Before_Trans
 	newTrx.Keterangan = reversedData.Keterangan
-	newTrx.Ref = reversedData.Ref
+	newTrx.Ref = reversedData.Product_Code + newTrx.Stan
 	newTrx.Synced_Ibs_Core = reversedData.Synced_Ibs_Core
 	newTrx.Synced_Ibs_Core_Description = reversedData.Synced_Ibs_Core_Description
 	newTrx.Bris_Original_Data = reversedData.Bris_Original_Data
@@ -92,32 +100,36 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (er error)
 	newTrx.Fee_Rek_Induk = reversedData.Fee_Rek_Induk
 
 	// CALL DUPLICATE DATA
-	_, er = dataRepo.DuplicatingData(newTrx)
+	cpy, er := dataRepo.DuplicatingData(newTrx)
 	if er != nil {
-		return er
+		return refStan, er
 	}
 
-	// CALL CHANGE RESPONSE CODE
-	er = dataRepo.ChangeRcOnReversedData(reversedData.Stan)
-	if er != nil {
-		return er
-	}
+	// if newTrx.Ref_Stan == reversedData.Stan {
+	// 	return refStan, err.DuplicateEntry
+	// }
 
-	// Extracting MsgTransHistory w TransHistory struct...
+	// Extracting TransHistory into MsgTransHistory..
 	isoMsg := entities.MsgTransHistory{
-		MTI:      newTrx.Mti,
-		BankCode: newTrx.Bank_Code,
-		Stan:     newTrx.Stan,
-		Date:     newTrx.Tgl_Trans_Str,
-		Msg:      newTrx.Msg,
+		MTI:      cpy.Mti,
+		BankCode: cpy.Bank_Code,
+		Stan:     cpy.Stan,
+		Ref:      cpy.Ref_Stan,
+		Date:     cpy.Tgl_Trans_Str,
+		Msg:      cpy.Msg,
 	}
 
-	// CALL RECYCLE TRANSACTION
+	// CALL RECYCLE REVERSED TRANSACTION
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleReversedTransaction(&isoMsg)
 	if isoMsg.ResponseCode != "0000" {
-		return errors.New(isoMsg.Msg)
+		er = dataRepo.ChangeRcOnReversedData(constant.Pending, cpy.Stan)
+		if er != nil {
+			return refStan, er
+		}
+		return refStan, errors.New(isoMsg.Msg)
 	} else {
-		return nil
+		refStan = newTrx.Product_Code + newTrx.Stan
+		return refStan, nil
 	}
 }

@@ -1,9 +1,8 @@
 package entities
 
-import "time"
-
 type TransHistory struct {
 	Stan                        string
+	Ref_Stan                    string
 	Tgl_Trans_Str               string
 	Bank_Code                   string
 	Rek_Id                      string
@@ -27,7 +26,6 @@ type TransHistory struct {
 	Msg                         string
 	Msg_Response                string
 	Bit39_Bit48_Hulu            string
-	Time_Stamp                  time.Time
 	Saldo_Before_Trans          int
 	Keterangan                  string
 	Ref                         string
@@ -71,6 +69,8 @@ type MsgTransHistory struct {
 	SubscriberID     string // bit 103
 	ProductCode      string // bit 104
 
+	Ref_Stan string
+	Ref      string
 }
 
 type CoreAddr struct {
@@ -86,4 +86,5 @@ type TransHistoryRequest struct {
 type TransHistoryResponse struct {
 	ResponseCode    string `json:"response_code"`
 	ResponseMessage string `json:"response_message"`
+	Ref_Stan        string `json:"receipt"`
 }

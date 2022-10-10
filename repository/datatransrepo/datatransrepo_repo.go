@@ -7,8 +7,8 @@ import (
 type DatatransRepo interface {
 	GetData(stan string) (entities.MsgTransHistory, error)
 	GetServeAddr(bankCode string) (entities.CoreAddr, error)
-
 	GetReversedData(stan string) (entities.TransHistory, error)
-	DuplicatingData(duplicated entities.TransHistory) (entities.TransHistory, error)
-	ChangeRcOnReversedData(stan string) error
+	DuplicatingData(copy entities.TransHistory) (entities.TransHistory, error)
+	ChangeRcOnReversedData(rc, stan string) error
+	RollbackDuplicate(stan string) error
 }

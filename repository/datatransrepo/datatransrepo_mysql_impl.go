@@ -32,7 +32,7 @@ func (d *DatatransRepoMysqlImpl) GetData(stan string) (data entities.MsgTransHis
 		if er == sql.ErrNoRows {
 			return data, nil
 		} else {
-			return data, errors.New(fmt.Sprint("error while get trans history : ", er.Error()))
+			return data, errors.New(fmt.Sprint("error while get data: ", er.Error()))
 		}
 	}
 
@@ -55,7 +55,7 @@ func (d *DatatransRepoMysqlImpl) GetServeAddr(bankCode string) (data entities.Co
 		if er == sql.ErrNoRows {
 			return data, nil
 		} else {
-			return data, errors.New(fmt.Sprint("error while get core addrs : ", er.Error()))
+			return data, errors.New(fmt.Sprint("error while get core addrs: ", er.Error()))
 		}
 	}
 
@@ -152,7 +152,7 @@ func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.Tra
 		if er == sql.ErrNoRows {
 			return data, nil
 		} else {
-			return data, errors.New(fmt.Sprint("error while get reversed data : ", er.Error()))
+			return data, errors.New(fmt.Sprint("error while get reversed data: ", er.Error()))
 		}
 	}
 	data.Saldo_Before_Trans = constant.SQLsaldo_before_trans.GetInt()
@@ -164,10 +164,11 @@ func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.Tra
 	return
 }
 
-func (d *DatatransRepoMysqlImpl) DuplicatingData(duplicated entities.TransHistory) (data entities.TransHistory, er error) {
+func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (data entities.TransHistory, er error) {
 
 	stmt, er := d.conn.Prepare(`INSERT INTO trans_history(
 		stan,
+		ref_stan,
 		tgl_trans_str,
 		bank_code,
 		rek_id,
@@ -207,74 +208,90 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(duplicated entities.TransHistor
 		no_hp_alternatif,
 		inc_notif_status,
 		fee_rek_induk
-	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 	if er != nil {
-		return data, errors.New(fmt.Sprint("error while prepare duplicating transaction : ", er.Error()))
+		return data, errors.New(fmt.Sprint("error while prepare duplicating transaction: ", er.Error()))
 	}
 	defer func() {
 		_ = stmt.Close()
 	}()
 
-	// Exec..
-	if _, er := stmt.Exec(
-		duplicated.Stan,
-		duplicated.Tgl_Trans_Str,
-		duplicated.Bank_Code,
-		duplicated.Rek_Id,
-		duplicated.Mti,
-		duplicated.Processing_Code,
-		duplicated.Biller_Code,
-		duplicated.Product_Code,
-		duplicated.Subscriber_Id,
-		duplicated.Dc,
-		duplicated.Response_Code,
-		duplicated.Amount,
-		duplicated.Qty,
-		duplicated.Profit_Included,
-		duplicated.Profit_Excluded,
-		duplicated.Profit_Share_Biller,
-		duplicated.Profit_Share_Aggregator,
-		duplicated.Profit_Share_Bank,
-		duplicated.Markup_Total,
-		duplicated.Markup_Share_Aggregator,
-		duplicated.Markup_Share_Bank,
-		duplicated.Msg,
-		duplicated.Msg_Response,
-		duplicated.Bit39_Bit48_Hulu,
-		duplicated.Saldo_Before_Trans,
-		duplicated.Keterangan,
-		duplicated.Ref,
-		duplicated.Synced_Ibs_Core,
-		duplicated.Synced_Ibs_Core_Description,
-		duplicated.Bris_Original_Data,
-		duplicated.Gateway_Id,
-		duplicated.Id_User,
-		duplicated.Id_Raw,
-		duplicated.Advice_Count,
-		duplicated.Status_Id,
-		duplicated.Nohp_Notif,
-		duplicated.Score,
-		duplicated.No_Hp_Alternatif,
-		duplicated.Inc_Notif_Status,
-		duplicated.Fee_Rek_Induk,
+	if _, er = stmt.Exec(
+		copy.Stan,
+		copy.Ref_Stan,
+		copy.Tgl_Trans_Str,
+		copy.Bank_Code,
+		copy.Rek_Id,
+		copy.Mti,
+		copy.Processing_Code,
+		copy.Biller_Code,
+		copy.Product_Code,
+		copy.Subscriber_Id,
+		copy.Dc,
+		copy.Response_Code,
+		copy.Amount,
+		copy.Qty,
+		copy.Profit_Included,
+		copy.Profit_Excluded,
+		copy.Profit_Share_Biller,
+		copy.Profit_Share_Aggregator,
+		copy.Profit_Share_Bank,
+		copy.Markup_Total,
+		copy.Markup_Share_Aggregator,
+		copy.Markup_Share_Bank,
+		copy.Msg,
+		copy.Msg_Response,
+		copy.Bit39_Bit48_Hulu,
+		copy.Saldo_Before_Trans,
+		copy.Keterangan,
+		copy.Ref,
+		copy.Synced_Ibs_Core,
+		copy.Synced_Ibs_Core_Description,
+		copy.Bris_Original_Data,
+		copy.Gateway_Id,
+		copy.Id_User,
+		copy.Id_Raw,
+		copy.Advice_Count,
+		copy.Status_Id,
+		copy.Nohp_Notif,
+		copy.Score,
+		copy.No_Hp_Alternatif,
+		copy.Inc_Notif_Status,
+		copy.Fee_Rek_Induk,
 	); er != nil {
-		return data, errors.New(fmt.Sprint("error while duplicating transaction : ", er.Error()))
+		return data, errors.New(fmt.Sprint("error while duplicating transaction: ", er.Error()))
 	} else {
-		return duplicated, nil
+		return copy, nil
 	}
 }
 
-func (d *DatatransRepoMysqlImpl) ChangeRcOnReversedData(stan string) (er error) {
-	stmt, er := d.conn.Prepare("UPDATE trans_history SET response_code = '1100' WHERE stan = ?")
+func (d *DatatransRepoMysqlImpl) ChangeRcOnReversedData(rc, stan string) (er error) {
+	stmt, er := d.conn.Prepare("UPDATE trans_history SET response_code = ? WHERE stan = ?")
 	if er != nil {
-		return errors.New(fmt.Sprint("error while prepare update transaction response code: ", er.Error()))
+		return errors.New(fmt.Sprint("error while prepare update response code: ", er.Error()))
+	}
+	defer func() {
+		_ = stmt.Close()
+	}()
+
+	if _, er = stmt.Exec(rc, stan); er != nil {
+		return errors.New(fmt.Sprint("error while update response code: ", er.Error()))
+	}
+
+	return nil
+}
+
+func (d *DatatransRepoMysqlImpl) RollbackDuplicate(stan string) (er error) {
+	stmt, er := d.conn.Prepare("DELETE FROM trans_history WHERE ref_stan = ?")
+	if er != nil {
+		return errors.New(fmt.Sprint("error while prepare delete duplicated transaction: ", er.Error()))
 	}
 	defer func() {
 		_ = stmt.Close()
 	}()
 
 	if _, er := stmt.Exec(stan); er != nil {
-		return errors.New(fmt.Sprint("error while update transaction response code: ", er.Error()))
+		return errors.New(fmt.Sprint("error while delete duplicated transaction: ", er.Error()))
 	}
 
 	return nil

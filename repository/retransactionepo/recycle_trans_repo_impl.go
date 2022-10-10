@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gwlkm-resend-transaction/entities"
+	"gwlkm-resend-transaction/repository/constant"
 	"gwlkm-resend-transaction/repository/datatransrepo"
 
 	iso8583uParser "github.com/randyardiansyah25/iso8583u/parser"
@@ -19,7 +20,7 @@ type retransactionRepoImpl struct {
 
 func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransHistory) (err error) {
 
-	//TODO: Send datatrans to ip & port gwlkm
+	//TODO: Send ISO data to ip & port gwlkm
 
 	repo, _ := datatransrepo.NewDatatransRepo()
 
@@ -62,7 +63,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 
 func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.MsgTransHistory) (err error) {
 
-	//TODO: Send datatrans to ip & port gwlkm
+	//TODO: Send ISO data to ip & port gwlkm
 
 	// ISO OBJ INIT..
 	isoUnMarshal, err := iso8583uParser.NewISO8583U()
@@ -71,12 +72,12 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 		return
 	}
 
+	//RE-COMPOSE ISO..
 	err = isoUnMarshal.GoUnMarshal(dataTrans.Msg)
 	if err != nil {
 		entities.PrintError(err.Error()) // <= err source ?
 		return
 	}
-	//RE-COMPOSE ISO..
 	isoUnMarshal.SetMti(dataTrans.MTI)
 	isoUnMarshal.SetField(3, isoUnMarshal.GetField(3))
 	isoUnMarshal.SetField(4, isoUnMarshal.GetField(4))
@@ -107,7 +108,7 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 		return
 	}
 
-	// CALL CORE-ADDR
+	// CALL CORE ADDR
 	repo, _ := datatransrepo.NewDatatransRepo()
 	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
 	if err != nil {
@@ -115,11 +116,10 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 	}
 
 	// TCP OBJ INIT..
-	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 30)
+	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 10)
 	st := client.Send(tcp.SetHeader(isoMsg, 4))
-	//fmt.Println(st.Code, " : ", st.Message) // <= fmt.println change with ?
 
-	// UNMARSHAL PROCS FROM SENDER
+	// UNMARSHAL ISO FROM SENDER
 	if st.Code == tcp.CONNOK {
 		err = isoUnMarshal.GoUnMarshal(st.Message)
 		if err != nil {
@@ -135,44 +135,11 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 		return errors.New(dataTrans.Msg)
 	}
 
+	// CALL CHANGE RESPONSE CODE
+	err = repo.ChangeRcOnReversedData(constant.Failed, dataTrans.Ref)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
-
-/*
-err = isoUnMarshal.GoUnMarshal(dataTrans.ResponseMessage)
-if err != nil {
-	return isoMsg, err
-}
-x := isoUnMarshal.PrettyPrint()
-
-Compose Obj
-isoUnMarshal.SetMti(dataTrans.MTI)
-isoUnMarshal.SetField(3, isoUnMarshal.GetField(3))
-isoUnMarshal.SetField(4, isoUnMarshal.GetField(4))
-isoUnMarshal.SetField(5, isoUnMarshal.GetField(5))
-isoUnMarshal.SetField(6, isoUnMarshal.GetField(6))
-isoUnMarshal.SetField(7, isoUnMarshal.GetField(7))
-isoUnMarshal.SetField(8, isoUnMarshal.GetField(8))
-isoUnMarshal.SetField(11, isoUnMarshal.GetField(11))
-isoUnMarshal.SetField(12, isoUnMarshal.GetField(12))
-isoUnMarshal.SetField(13, isoUnMarshal.GetField(13))
-isoUnMarshal.SetField(18, isoUnMarshal.GetField(18))
-isoUnMarshal.SetField(26, isoUnMarshal.GetField(26))
-isoUnMarshal.SetField(32, isoUnMarshal.GetField(32))
-isoUnMarshal.SetField(37, isoUnMarshal.GetField(37))
-isoUnMarshal.SetField(40, isoUnMarshal.GetField(40))
-isoUnMarshal.SetField(41, isoUnMarshal.GetField(41))
-isoUnMarshal.SetField(42, isoUnMarshal.GetField(42))
-isoUnMarshal.SetField(43, isoUnMarshal.GetField(43))
-isoUnMarshal.SetField(47, isoUnMarshal.GetField(47))
-isoUnMarshal.SetField(61, isoUnMarshal.GetField(61))
-isoUnMarshal.SetField(100, isoUnMarshal.GetField(100))
-isoUnMarshal.SetField(103, isoUnMarshal.GetField(103))
-isoUnMarshal.SetField(104, isoUnMarshal.GetField(104))
-
-# Marshal Procs..
-isoMsg, err = isoUnMarshal.GoMarshal()
-if err != nil {
-	return isoMsg, err
-}
-*/

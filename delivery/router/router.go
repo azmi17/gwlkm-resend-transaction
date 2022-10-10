@@ -21,7 +21,7 @@ func Start() error {
 
 	listenerPort := os.Getenv("app.listener_port") // get port from .env
 
-	_ = glg.Logf("[HTTP] Listening at : %s", listenerPort)
+	_ = glg.Logf("[HTTP] Listening at: %s", listenerPort)
 	return router.Run(":" + listenerPort)
 
 }

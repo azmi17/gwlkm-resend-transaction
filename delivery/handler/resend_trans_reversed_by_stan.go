@@ -16,7 +16,7 @@ func ResendReversedTransByStan(ctx *gin.Context) {
 	httpio.Bind(&payload)
 
 	usecase := usecase.NewRetransactionUsecase()
-	er := usecase.ResendReversedTransaction(payload.Stan)
+	ref, er := usecase.ResendReversedTransaction(payload.Stan)
 
 	resp := entities.TransHistoryResponse{}
 	if er != nil {
@@ -27,6 +27,7 @@ func ResendReversedTransByStan(ctx *gin.Context) {
 	} else {
 		resp.ResponseCode = "0000"
 		resp.ResponseMessage = "Resend transaction succeeded"
+		resp.Ref_Stan = ref
 	}
 	httpio.Response(http.StatusOK, resp)
 }
