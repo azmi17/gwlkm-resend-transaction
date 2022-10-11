@@ -14,10 +14,11 @@ func AppInfo(ctx *gin.Context) {
 	httpio.Recv()
 
 	appInfo := map[string]interface{}{
-		"App Name":        os.Getenv("application.name"),
-		"App Description": os.Getenv("application.desc"),
-		"App Version":     os.Getenv("application.version"),
-		"App Author":      os.Getenv("application.author"),
+		"App Name":         os.Getenv("application.name"),
+		"App Description":  os.Getenv("application.desc"),
+		"App Version":      os.Getenv("application.version"),
+		"App Author":       os.Getenv("application.author"),
+		"App Release Date": os.Getenv("application.release_date"),
 	}
 
 	httpio.Response(http.StatusOK, appInfo)
