@@ -13,6 +13,7 @@ var (
 
 var (
 	Success = "0000"
+	Suspect = "1235"
 	Pending = "1234"
 	Failed  = "1100"
 )

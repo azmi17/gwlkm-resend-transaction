@@ -10,7 +10,7 @@ import (
 )
 
 func ResendTransByStan(ctx *gin.Context) {
-	httpio := httpio.NewRequestIO(ctx) // catch request
+	httpio := httpio.NewRequestIO(ctx)
 
 	payload := entities.TransHistoryRequest{}
 	httpio.Bind(&payload)
@@ -21,7 +21,6 @@ func ResendTransByStan(ctx *gin.Context) {
 	resp := entities.TransHistoryResponse{}
 	if er != nil {
 		entities.PrintError(er.Error())
-		// entities.PrintLog(er.Error())
 		resp.ResponseCode = "1111"
 		resp.ResponseMessage = er.Error()
 	} else {

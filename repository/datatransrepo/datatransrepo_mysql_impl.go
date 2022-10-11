@@ -65,6 +65,7 @@ func (d *DatatransRepoMysqlImpl) GetServeAddr(bankCode string) (data entities.Co
 func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.TransHistory, er error) {
 	row := d.conn.QueryRow(`SELECT 
 		stan,
+		ref_stan,
 		tgl_trans_str,
 		bank_code,
 		rek_id,
@@ -108,6 +109,7 @@ func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.Tra
 
 	er = row.Scan(
 		&data.Stan,
+		&data.Ref_Stan,
 		&data.Tgl_Trans_Str,
 		&data.Bank_Code,
 		&data.Rek_Id,
@@ -164,7 +166,7 @@ func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.Tra
 	return
 }
 
-func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (data entities.TransHistory, er error) {
+func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er error) {
 
 	stmt, er := d.conn.Prepare(`INSERT INTO trans_history(
 		stan,
@@ -210,7 +212,7 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (da
 		fee_rek_induk
 	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 	if er != nil {
-		return data, errors.New(fmt.Sprint("error while prepare duplicating transaction: ", er.Error()))
+		return errors.New(fmt.Sprint("error while prepare duplicating transaction: ", er.Error()))
 	}
 	defer func() {
 		_ = stmt.Close()
@@ -259,9 +261,9 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (da
 		copy.Inc_Notif_Status,
 		copy.Fee_Rek_Induk,
 	); er != nil {
-		return data, errors.New(fmt.Sprint("error while duplicating transaction: ", er.Error()))
+		return errors.New(fmt.Sprint("error while duplicating transaction: ", er.Error()))
 	} else {
-		return copy, nil
+		return nil
 	}
 }
 

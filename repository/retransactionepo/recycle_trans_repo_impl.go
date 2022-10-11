@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gwlkm-resend-transaction/entities"
-	"gwlkm-resend-transaction/repository/constant"
+	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/repository/datatransrepo"
 
 	iso8583uParser "github.com/randyardiansyah25/iso8583u/parser"
@@ -31,7 +31,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 	}
 
 	// TCP OBJ INIT..
-	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 10)
+	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
 	st := client.Send(tcp.SetHeader(dataTrans.Msg, 4))
 	//fmt.Println(st.Code, " : ", st.Message) // <= fmt.println change with ?
 
@@ -87,7 +87,7 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 	isoUnMarshal.SetField(8, isoUnMarshal.GetField(8))
 	isoUnMarshal.SetField(11, dataTrans.Stan)
 	isoUnMarshal.SetField(12, dataTrans.Date)
-	isoUnMarshal.SetField(13, isoUnMarshal.GetField(13))
+	isoUnMarshal.SetField(13, helper.GETMMDD[4:8])
 	isoUnMarshal.SetField(18, isoUnMarshal.GetField(18))
 	isoUnMarshal.SetField(26, isoUnMarshal.GetField(26))
 	isoUnMarshal.SetField(32, isoUnMarshal.GetField(32))
@@ -116,7 +116,7 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 	}
 
 	// TCP OBJ INIT..
-	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 10)
+	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
 	st := client.Send(tcp.SetHeader(isoMsg, 4))
 
 	// UNMARSHAL ISO FROM SENDER
@@ -133,12 +133,6 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 	} else {
 		dataTrans.Msg = fmt.Sprint("re-transaciton failed: ", st.Message)
 		return errors.New(dataTrans.Msg)
-	}
-
-	// CALL CHANGE RESPONSE CODE
-	err = repo.ChangeRcOnReversedData(constant.Failed, dataTrans.Ref)
-	if err != nil {
-		return err
 	}
 
 	return nil

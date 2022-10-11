@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"gwlkm-resend-transaction/entities"
+	"gwlkm-resend-transaction/entities/err"
 	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/repository/constant"
 	"gwlkm-resend-transaction/repository/datatransrepo"
@@ -22,17 +23,16 @@ func NewRetransactionUsecase() RetransactionUsecase {
 
 func (r *retransactionUsecase) ResendTransaction(stan string) (er error) {
 
-	var data entities.MsgTransHistory
-
 	// INIT REPOSITORY BANK DATA
 	dataRepo, _ := datatransrepo.NewDatatransRepo()
 
-	// CALL DATA BY STAN
+	// SEARCH DATA BY STAN
+	var data entities.MsgTransHistory
 	if data, er = dataRepo.GetData(stan); er != nil {
 		return er
 	}
 
-	// CALL RECYCLE TRANSACTION
+	// RECYCLE TRANSACTION
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleTransaction(&data)
 	if data.ResponseCode != "0000" {
@@ -42,90 +42,75 @@ func (r *retransactionUsecase) ResendTransaction(stan string) (er error) {
 	}
 }
 
-func (r *retransactionUsecase) ResendReversedTransaction(stan string) (refStan string, er error) {
+func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan string, er error) {
 
-	var reversedData entities.TransHistory
+	// REPEAT TRANS COND
+	isRepeat := false
 
 	// INIT REPOSITORY BANK DATA
 	dataRepo, _ := datatransrepo.NewDatatransRepo()
 
-	// CALL REVERSED DATA BY STAN
+	// SEARCH REVERSED DATA BY STAN
+	var reversedData entities.TransHistory
 	if reversedData, er = dataRepo.GetReversedData(stan); er != nil {
-		return refStan, er
+		return newStan, er
 	}
 
-	// RECOMPOSING FOR DUPLICATE PROCS
-	newTrx := entities.TransHistory{}
-	newTrx.Stan = helper.GenerateSTAN()
-	newTrx.Ref_Stan = reversedData.Stan
-	newTrx.Tgl_Trans_Str = helper.GetCurrentDate()
-	// newTrx.Tgl_Trans_Str = reversedData.Tgl_Trans_Str
-	newTrx.Bank_Code = reversedData.Bank_Code
-	newTrx.Rek_Id = reversedData.Rek_Id
-	newTrx.Mti = reversedData.Mti
-	newTrx.Processing_Code = reversedData.Processing_Code
-	newTrx.Biller_Code = reversedData.Biller_Code
-	newTrx.Product_Code = reversedData.Product_Code
-	newTrx.Subscriber_Id = reversedData.Subscriber_Id
-	newTrx.Dc = reversedData.Dc
-	newTrx.Response_Code = "0000"
-	newTrx.Amount = reversedData.Amount
-	newTrx.Qty = reversedData.Qty
-	newTrx.Profit_Included = reversedData.Profit_Included
-	newTrx.Profit_Excluded = reversedData.Profit_Excluded
-	newTrx.Profit_Share_Biller = reversedData.Profit_Share_Biller
-	newTrx.Profit_Share_Aggregator = reversedData.Profit_Share_Aggregator
-	newTrx.Profit_Share_Bank = reversedData.Profit_Share_Bank
-	newTrx.Markup_Total = reversedData.Markup_Total
-	newTrx.Markup_Share_Aggregator = reversedData.Markup_Share_Aggregator
-	newTrx.Markup_Share_Bank = reversedData.Markup_Share_Bank
-	newTrx.Msg = reversedData.Msg
-	newTrx.Msg_Response = reversedData.Msg_Response
-	newTrx.Bit39_Bit48_Hulu = reversedData.Bit39_Bit48_Hulu
-	newTrx.Saldo_Before_Trans = reversedData.Saldo_Before_Trans
-	newTrx.Keterangan = reversedData.Keterangan
-	newTrx.Ref = reversedData.Product_Code + newTrx.Stan
-	newTrx.Synced_Ibs_Core = reversedData.Synced_Ibs_Core
-	newTrx.Synced_Ibs_Core_Description = reversedData.Synced_Ibs_Core_Description
-	newTrx.Bris_Original_Data = reversedData.Bris_Original_Data
-	newTrx.Gateway_Id = reversedData.Gateway_Id
-	newTrx.Id_User = reversedData.Id_User
-	newTrx.Id_Raw = reversedData.Id_Raw
-	newTrx.Advice_Count = reversedData.Advice_Count
-	newTrx.Status_Id = reversedData.Status_Id
-	newTrx.Nohp_Notif = reversedData.Nohp_Notif
-	newTrx.Score = reversedData.Score
-	newTrx.No_Hp_Alternatif = reversedData.No_Hp_Alternatif
-	newTrx.Inc_Notif_Status = reversedData.Inc_Notif_Status
-	newTrx.Fee_Rek_Induk = reversedData.Fee_Rek_Induk
+	// Validation chk: If ref_stan == ""  & RC is not 0000
+	if reversedData.Ref_Stan == "" && reversedData.Response_Code != "0000" {
+		return newStan, err.RCMustBeSuccess
+	}
 
-	// CALL DUPLICATE DATA
-	cpy, er := dataRepo.DuplicatingData(newTrx)
-	if er != nil {
-		return refStan, er
+	// Check if data repeated => isRepeat will be TRUE
+	if reversedData.Ref_Stan != "" && (reversedData.Response_Code == constant.Suspect || reversedData.Response_Code == constant.Success) {
+		isRepeat = true
+	}
+	newTrx := reversedData
+	newStan = reversedData.Stan
+
+	// If not repeat
+	if !isRepeat {
+		// Dupolicating & assign new value from origin record..
+		newTrx.Stan = helper.GenerateSTAN()
+		newStan = newTrx.Stan
+		newTrx.Ref_Stan = reversedData.Stan
+		newTrx.Tgl_Trans_Str = helper.GetCurrentDate()
+		newTrx.Ref = reversedData.Product_Code + newTrx.Stan
+		newTrx.Response_Code = constant.Suspect
+
+		// DO: DUPLICATE DATA
+		er := dataRepo.DuplicatingData(newTrx)
+		if er != nil {
+			return newStan, er
+		}
+
+		// CHANGE RC: ORIGIN RECORD
+		er = dataRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan)
+		if er != nil {
+			return newStan, err.InternalServiceError
+		}
 	}
 
 	// Extracting TransHistory into MsgTransHistory..
 	isoMsg := entities.MsgTransHistory{
-		MTI:      cpy.Mti,
-		BankCode: cpy.Bank_Code,
-		Stan:     cpy.Stan,
-		Ref:      cpy.Ref_Stan,
-		Date:     cpy.Tgl_Trans_Str,
-		Msg:      cpy.Msg,
+		MTI:      newTrx.Mti,
+		BankCode: newTrx.Bank_Code,
+		Stan:     newTrx.Stan,
+		Date:     newTrx.Tgl_Trans_Str,
+		Msg:      newTrx.Msg,
 	}
 
-	// CALL RECYCLE REVERSED TRANSACTION
+	// RECYCLE REVERSED TRANSACTION
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleReversedTransaction(&isoMsg)
-	if isoMsg.ResponseCode != "0000" {
-		er = dataRepo.ChangeRcOnReversedData(constant.Pending, cpy.Stan)
+	if isoMsg.ResponseCode == constant.Success {
+		er = dataRepo.ChangeRcOnReversedData(constant.Success, newTrx.Stan)
 		if er != nil {
-			return refStan, er
+			return newStan, err.InternalServiceError
 		}
-		return refStan, errors.New(isoMsg.Msg)
 	} else {
-		refStan = newTrx.Product_Code + newTrx.Stan
-		return refStan, nil
+		er = errors.New(isoMsg.Msg)
 	}
+
+	return newStan, er
 }

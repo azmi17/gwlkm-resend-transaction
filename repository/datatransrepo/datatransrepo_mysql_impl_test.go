@@ -158,7 +158,7 @@ func TestReversedData(t *testing.T) {
 	newTrx.Fee_Rek_Induk = reversedData.Fee_Rek_Induk
 
 	// CALL DUPLICATE DATA
-	trx, err := dataTransRepo.DuplicatingData(newTrx)
+	err = dataTransRepo.DuplicatingData(newTrx)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -172,11 +172,11 @@ func TestReversedData(t *testing.T) {
 	// fmt.Println("Update reversed transaction succeeded")
 
 	// CALL CORE-ADDRS
-	coreAddr, _ := dataTransRepo.GetServeAddr(trx.Bank_Code)
+	coreAddr, _ := dataTransRepo.GetServeAddr(newTrx.Bank_Code)
 
 	// CALL TCP AND SEND ISO MSG
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 30)
-	st := client.Send(tcp.SetHeader(trx.Msg, 4))
+	st := client.Send(tcp.SetHeader(newTrx.Msg, 4))
 	fmt.Println(st.Code, " : ", st.Message)
 
 	// ISO OBJ INIT..
@@ -258,7 +258,7 @@ func TestReversedDataTwo(t *testing.T) {
 	newTrx.Fee_Rek_Induk = reversedData.Fee_Rek_Induk
 
 	// CALL DUPLICATE DATA
-	trx, err := dataTransRepo.DuplicatingData(newTrx)
+	err = dataTransRepo.DuplicatingData(newTrx)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -276,7 +276,7 @@ func TestReversedDataTwo(t *testing.T) {
 		fmt.Println("load package error", err.Error())
 		return
 	}
-	err = isoUnMarshal.GoUnMarshal(trx.Msg)
+	err = isoUnMarshal.GoUnMarshal(newTrx.Msg)
 	if err != nil {
 		t.Error(err.Error())
 		return
@@ -286,15 +286,15 @@ func TestReversedDataTwo(t *testing.T) {
 	// t.Log("Parse : \n", isoUnMarshal.PrettyPrint())
 
 	//Marshal Procs..
-	isoUnMarshal.SetMti(trx.Mti)
+	isoUnMarshal.SetMti(newTrx.Mti)
 	isoUnMarshal.SetField(3, isoUnMarshal.GetField(3))
 	isoUnMarshal.SetField(4, isoUnMarshal.GetField(4))
 	isoUnMarshal.SetField(5, isoUnMarshal.GetField(5))
 	isoUnMarshal.SetField(6, isoUnMarshal.GetField(6))
 	isoUnMarshal.SetField(7, isoUnMarshal.GetField(7))
 	isoUnMarshal.SetField(8, isoUnMarshal.GetField(8))
-	isoUnMarshal.SetField(11, trx.Stan)
-	isoUnMarshal.SetField(12, trx.Tgl_Trans_Str)
+	isoUnMarshal.SetField(11, newTrx.Stan)
+	isoUnMarshal.SetField(12, newTrx.Tgl_Trans_Str)
 	isoUnMarshal.SetField(13, isoUnMarshal.GetField(13))
 	isoUnMarshal.SetField(18, isoUnMarshal.GetField(18))
 	isoUnMarshal.SetField(26, isoUnMarshal.GetField(26))
@@ -318,7 +318,7 @@ func TestReversedDataTwo(t *testing.T) {
 	// t.Log("Result : ", isoMsg)
 
 	// CALL CORE-ADDRS
-	coreAddr, _ := dataTransRepo.GetServeAddr(trx.Bank_Code)
+	coreAddr, _ := dataTransRepo.GetServeAddr(newTrx.Bank_Code)
 
 	// CALL TCP AND SEND ISO MSG
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 30)
@@ -340,4 +340,5 @@ func TestReversedDataTwo(t *testing.T) {
 func TestGetCurrentDate(t *testing.T) {
 	now := helper.GetCurrentDate()
 	fmt.Println(now)
+	fmt.Println(now[4:8])
 }

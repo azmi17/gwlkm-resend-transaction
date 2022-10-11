@@ -86,5 +86,5 @@ type TransHistoryRequest struct {
 type TransHistoryResponse struct {
 	ResponseCode    string `json:"response_code"`
 	ResponseMessage string `json:"response_message"`
-	Ref_Stan        string `json:"receipt"`
+	NewStan         string `json:"new_stan"`
 }
