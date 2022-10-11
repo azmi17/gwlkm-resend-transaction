@@ -22,9 +22,20 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 
 	//TODO: Send ISO data to ip & port gwlkm
 
-	repo, _ := datatransrepo.NewDatatransRepo()
+	// ISO OBJ INIT..
+	isoUnMarshal, err := iso8583uParser.NewISO8583U()
+	if err != nil {
+		entities.PrintError("load package error", err.Error())
+		return
+	}
+	err = isoUnMarshal.GoUnMarshal(dataTrans.Msg)
+	if err != nil {
+		entities.PrintError(err.Error()) // <= err source ?
+		return
+	}
 
-	// CALL CORE ADDR
+	// INIT CORE-ADDR
+	repo, _ := datatransrepo.NewDatatransRepo()
 	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
 	if err != nil {
 		entities.PrintError(err.Error())
@@ -32,15 +43,8 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 
 	// TCP OBJ INIT..
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
+	entities.PrintLog("SEND:\n", isoUnMarshal.PrettyPrint())
 	st := client.Send(tcp.SetHeader(dataTrans.Msg, 4))
-	//fmt.Println(st.Code, " : ", st.Message) // <= fmt.println change with ?
-
-	// ISO OBJ INIT..
-	isoUnMarshal, err := iso8583uParser.NewISO8583U()
-	if err != nil {
-		entities.PrintError("load package error", err.Error())
-		return
-	}
 
 	// UNMARSHAL PROCS FROM SENDER
 	if st.Code == tcp.CONNOK {
@@ -52,7 +56,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 		// Override below:
 		dataTrans.ResponseCode = isoUnMarshal.GetField(39)
 		dataTrans.Msg = isoUnMarshal.GetField(48)
-		isoUnMarshal.PrettyPrint()
+		entities.PrintLog("RECV:\n", isoUnMarshal.PrettyPrint())
 	} else {
 		dataTrans.Msg = fmt.Sprint("re-transaciton failed: ", st.Message)
 		return errors.New(dataTrans.Msg)
@@ -75,7 +79,7 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 	//RE-COMPOSE ISO..
 	err = isoUnMarshal.GoUnMarshal(dataTrans.Msg)
 	if err != nil {
-		entities.PrintError(err.Error()) // <= err source ?
+		entities.PrintError(err.Error())
 		return
 	}
 	isoUnMarshal.SetMti(dataTrans.MTI)
@@ -117,6 +121,7 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 
 	// TCP OBJ INIT..
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
+	entities.PrintLog("SEND:\n", isoUnMarshal.PrettyPrint())
 	st := client.Send(tcp.SetHeader(isoMsg, 4))
 
 	// UNMARSHAL ISO FROM SENDER
@@ -129,7 +134,7 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 		// Override below:
 		dataTrans.ResponseCode = isoUnMarshal.GetField(39)
 		dataTrans.Msg = isoUnMarshal.GetField(48)
-		isoUnMarshal.PrettyPrint()
+		entities.PrintLog("RECV:\n", isoUnMarshal.PrettyPrint())
 	} else {
 		dataTrans.Msg = fmt.Sprint("re-transaciton failed: ", st.Message)
 		return errors.New(dataTrans.Msg)

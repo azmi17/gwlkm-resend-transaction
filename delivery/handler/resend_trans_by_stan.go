@@ -18,7 +18,7 @@ func ResendTransByStan(ctx *gin.Context) {
 	usecase := usecase.NewRetransactionUsecase()
 	er := usecase.ResendTransaction(payload.Stan)
 
-	resp := entities.TransHistoryResponse{}
+	resp := entities.TransHistoryUnreversedResponse{}
 	if er != nil {
 		entities.PrintError(er.Error())
 		resp.ResponseCode = "1111"

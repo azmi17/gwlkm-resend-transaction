@@ -83,7 +83,12 @@ type TransHistoryRequest struct {
 	Stan string `form:"stan"`
 }
 
-type TransHistoryResponse struct {
+type TransHistoryUnreversedResponse struct {
+	ResponseCode    string `json:"response_code"`
+	ResponseMessage string `json:"response_message"`
+}
+
+type TransHistoryReversedResponse struct {
 	ResponseCode    string `json:"response_code"`
 	ResponseMessage string `json:"response_message"`
 	NewStan         string `json:"new_stan"`
