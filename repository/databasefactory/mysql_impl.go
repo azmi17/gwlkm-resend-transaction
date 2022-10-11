@@ -10,6 +10,7 @@ import (
 	"github.com/randyardiansyah25/libpkg/util/env"
 
 	_ "github.com/go-sql-driver/mysql"
+	aes "github.com/randyardiansyah25/libpkg/security/aes"
 )
 
 type mysqlImpl struct {
@@ -25,10 +26,13 @@ func (m *mysqlImpl) Connect() error {
 
 	//Mysql Connection String Format : [username[:password]@][protocol[(address)]]/dbname[?param1=value1&...&paramN=valueN]
 	//Example : root:123456@tcp(127.0.0.1:3306)/employees?charset=utf8
+	pwd := os.Getenv(m.prefix + "mysql.password")
+	pwd, _ = aes.Decrypt([]byte("ECHRESENDTXT00LS"), []byte("ECHRESENDTXT00LS"), pwd)
 	connectionString := fmt.Sprintf(
+
 		"%s:%s@tcp(%s:%s)/%s?parseTime=true",
 		os.Getenv(m.prefix+"mysql.username"),
-		os.Getenv(m.prefix+"mysql.password"),
+		pwd,
 		os.Getenv(m.prefix+"mysql.address"),
 		os.Getenv(m.prefix+"mysql.port"),
 		os.Getenv(m.prefix+"mysql.name"),

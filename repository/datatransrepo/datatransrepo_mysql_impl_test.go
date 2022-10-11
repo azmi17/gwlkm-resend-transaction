@@ -13,6 +13,7 @@ import (
 	"github.com/randyardiansyah25/libpkg/net/tcp"
 
 	iso8583uParser "github.com/randyardiansyah25/iso8583u/parser"
+	aes "github.com/randyardiansyah25/libpkg/security/aes"
 )
 
 func GetConnection() *sql.DB {
@@ -341,4 +342,33 @@ func TestGetCurrentDate(t *testing.T) {
 	now := helper.GetCurrentDate()
 	fmt.Println(now)
 	fmt.Println(now[4:8])
+}
+
+func TestAesCrypto_Encrypt(t *testing.T) {
+	key := []byte("ECHRESENDTXT00LS")
+	iv := key
+	plaintext := "123456"
+
+	t.Logf("Plain text : %s\n", plaintext)
+	ciphertext, err := aes.Encrypt(key, iv, []byte(plaintext))
+	if err != nil {
+		t.Error(err)
+	}
+	//t.Logf("Encrypted  : %0x\n", ciphertext)
+	t.Logf("Encrypted  : %s\n", ciphertext)
+
+}
+
+func TestAesCrypto_Decrypt(t *testing.T) {
+	key := []byte("ECHRESENDTXT00LS")
+	iv := key
+	ciphertext := "2397140C989F8BBB061250F419E84D34"
+
+	t.Logf("Encrypted text : %s\n", ciphertext)
+	plaintextb, err := aes.Decrypt(key, iv, ciphertext)
+	if err != nil {
+		t.Error(err)
+	}
+	plaintext := string(plaintextb)
+	t.Logf("Encrypted  : %s\n", plaintext)
 }
