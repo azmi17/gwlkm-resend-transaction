@@ -74,6 +74,7 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 		newTrx.Stan = helper.GenerateSTAN()
 		newStan = newTrx.Stan
 		newTrx.Ref_Stan = reversedData.Stan
+		newTrx.Dc = "d"
 		newTrx.Tgl_Trans_Str = helper.GetCurrentDate()
 		newTrx.Ref = reversedData.Product_Code + newTrx.Stan
 		newTrx.Response_Code = constant.Suspect
@@ -83,28 +84,23 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 		if er != nil {
 			return newStan, er
 		}
-
-		// CHANGE RC: ORIGIN RECORD
-		er = dataRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan)
-		if er != nil {
-			return newStan, err.InternalServiceError
-		}
 	}
 
 	// Extracting TransHistory into MsgTransHistory..
 	isoMsg := entities.MsgTransHistory{
-		MTI:      newTrx.Mti,
-		BankCode: newTrx.Bank_Code,
-		Stan:     newTrx.Stan,
-		Date:     newTrx.Tgl_Trans_Str,
-		Msg:      newTrx.Msg,
+		MTI:            newTrx.Mti,
+		BankCode:       newTrx.Bank_Code,
+		ProcessingCode: newTrx.Processing_Code,
+		Stan:           newTrx.Stan,
+		Date:           newTrx.Tgl_Trans_Str,
+		Msg:            newTrx.Msg,
 	}
 
 	// RECYCLE REVERSED TRANSACTION
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleReversedTransaction(&isoMsg)
 	if isoMsg.ResponseCode == constant.Success {
-		er = dataRepo.ChangeRcOnReversedData(constant.Success, newTrx.Stan)
+		er = dataRepo.ChangeRcOnReversedData(constant.Success, newTrx.Stan, newTrx.Trans_id)
 		if er != nil {
 			return newStan, err.InternalServiceError
 		}

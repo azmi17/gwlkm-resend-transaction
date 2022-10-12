@@ -17,7 +17,7 @@ import (
 )
 
 func GetConnection() *sql.DB {
-	dataSource := "root:@tcp(localhost:3317)/echannel?parseTime=true"
+	dataSource := "root:azmic0ps@tcp(localhost:3317)/echannel?parseTime=true"
 	db, err := sql.Open("mysql", dataSource)
 	if err != nil {
 		panic(err)
@@ -166,7 +166,7 @@ func TestReversedData(t *testing.T) {
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan)
+	err = dataTransRepo.ChangeRcOnReversedData(constant.Resended, reversedData.Stan, reversedData.Trans_id)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -266,7 +266,7 @@ func TestReversedDataTwo(t *testing.T) {
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan)
+	err = dataTransRepo.ChangeRcOnReversedData(constant.Resended, reversedData.Stan, reversedData.Trans_id)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -371,4 +371,14 @@ func TestAesCrypto_Decrypt(t *testing.T) {
 	}
 	plaintext := string(plaintextb)
 	t.Logf("Encrypted  : %s\n", plaintext)
+}
+
+func TestGetReversedData(t *testing.T) {
+	db := GetConnection()
+	dataTransRepo := newDatatransRepoMysqlImpl(db)
+	data, err := dataTransRepo.GetReversedData("100041274590")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	fmt.Println("Ref STAN:", len(data.Ref_Stan))
 }

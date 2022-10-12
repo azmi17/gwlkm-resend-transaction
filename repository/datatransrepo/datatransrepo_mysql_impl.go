@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"gwlkm-resend-transaction/entities"
+	"gwlkm-resend-transaction/entities/err"
 	"gwlkm-resend-transaction/repository/constant"
 )
 
@@ -19,12 +20,14 @@ type DatatransRepoMysqlImpl struct {
 func (d *DatatransRepoMysqlImpl) GetData(stan string) (data entities.MsgTransHistory, er error) {
 	row := d.conn.QueryRow(`SELECT 
 		mti,
+		processing_code,
 		bank_code,
 		msg
-		FROM trans_history WHERE stan= ?`, stan)
+		FROM trans_history WHERE stan= ? AND dc='d' AND response_code='0000'`, stan)
 
 	er = row.Scan(
 		&data.MTI,
+		&data.ProcessingCode,
 		&data.BankCode,
 		&data.Msg,
 	)
@@ -63,51 +66,55 @@ func (d *DatatransRepoMysqlImpl) GetServeAddr(bankCode string) (data entities.Co
 }
 
 func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.TransHistory, er error) {
+	// var refStan sql.NullString
 	row := d.conn.QueryRow(`SELECT 
-		stan,
-		ref_stan,
-		tgl_trans_str,
-		bank_code,
-		rek_id,
-		mti,
-		processing_code,
-		biller_code,
-		product_code,
-		subscriber_id,
-		dc,
-		response_code,
-		amount,
-		qty,
-		profit_included,
-		profit_excluded,
-		profit_share_biller,
-		profit_share_aggregator,
-		profit_share_bank,
-		markup_total,
-		markup_share_aggregator,
-		markup_share_bank,
-		msg,
-		msg_response,
-		bit39_bit48_hulu,
-		saldo_before_trans,
-		keterangan,
-		ref,
-		synced_ibs_core,
-		synced_ibs_core_description,
-		bris_original_data,
-		gateway_id,
-		id_user,
-		id_raw,
-		advice_count,
-		status_id,
-		nohp_notif,
-		score,
-		no_hp_alternatif,
-		inc_notif_status,
-		fee_rek_induk
-	FROM trans_history WHERE stan= ?`, stan)
+		th.trans_id,
+		th.stan,
+		COALESCE(sr.ref_stan, '') as ref_stan,
+		th.tgl_trans_str,
+		th.bank_code,
+		th.rek_id,
+		th.mti,
+		th.processing_code,
+		th.biller_code,
+		th.product_code,
+		th.subscriber_id,
+		th.dc,
+		th.response_code,
+		th.amount,
+		th.qty,
+		th.profit_included,
+		th.profit_excluded,
+		th.profit_share_biller,
+		th.profit_share_aggregator,
+		th.profit_share_bank,
+		th.markup_total,
+		th.markup_share_aggregator,
+		th.markup_share_bank,
+		th.msg,
+		th.msg_response,
+		th.bit39_bit48_hulu,
+		th.saldo_before_trans,
+		th.keterangan,
+		th.ref,
+		th.synced_ibs_core,
+		th.synced_ibs_core_description,
+		th.bris_original_data,
+		th.gateway_id,
+		th.id_user,
+		th.id_raw,
+		th.advice_count,
+		th.status_id,
+		th.nohp_notif,
+		th.score,
+		th.no_hp_alternatif,
+		th.inc_notif_status,
+		th.fee_rek_induk
+	FROM trans_history AS th 
+	LEFT JOIN stan_ref_retrans AS sr ON(th.trans_id=sr.trans_id) WHERE th.stan= ? AND dc='d'`, stan)
 
 	er = row.Scan(
+		&data.Trans_id,
 		&data.Stan,
 		&data.Ref_Stan,
 		&data.Tgl_Trans_Str,
@@ -170,7 +177,6 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 
 	stmt, er := d.conn.Prepare(`INSERT INTO trans_history(
 		stan,
-		ref_stan,
 		tgl_trans_str,
 		bank_code,
 		rek_id,
@@ -210,7 +216,7 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 		no_hp_alternatif,
 		inc_notif_status,
 		fee_rek_induk
-	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 	if er != nil {
 		return errors.New(fmt.Sprint("error while prepare duplicating transaction: ", er.Error()))
 	}
@@ -218,9 +224,8 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 		_ = stmt.Close()
 	}()
 
-	if _, er = stmt.Exec(
+	if stmt, er := stmt.Exec(
 		copy.Stan,
-		copy.Ref_Stan,
 		copy.Tgl_Trans_Str,
 		copy.Bank_Code,
 		copy.Rek_Id,
@@ -263,12 +268,35 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 	); er != nil {
 		return errors.New(fmt.Sprint("error while duplicating transaction: ", er.Error()))
 	} else {
+
+		// Get Last insert ID
+		lastId, txErr := stmt.LastInsertId()
+		if txErr != nil {
+			return errors.New(fmt.Sprint("error while get last insert id - add stan reference: ", txErr.Error()))
+		}
+
+		// below is to add ref_stan to stan_ref_retrans and change response_code belonging to the first record..
+		dataRepo, _ := NewDatatransRepo()
+		addStanReference := entities.StanReference{
+			Trans_id: int(lastId),
+			Ref_Stan: copy.Ref_Stan,
+			Stan:     copy.Stan,
+		}
+		er = dataRepo.AddStanReference(addStanReference)
+		if er != nil {
+			return er
+		}
+		er = dataRepo.ChangeRcOnReversedData(constant.Resended, copy.Ref_Stan, copy.Trans_id)
+		if er != nil {
+			return err.InternalServiceError
+		}
+
 		return nil
 	}
 }
 
-func (d *DatatransRepoMysqlImpl) ChangeRcOnReversedData(rc, stan string) (er error) {
-	stmt, er := d.conn.Prepare("UPDATE trans_history SET response_code = ? WHERE stan = ?")
+func (d *DatatransRepoMysqlImpl) ChangeRcOnReversedData(rc, stan string, transId int) (er error) {
+	stmt, er := d.conn.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND dc='d' AND trans_id = ?`)
 	if er != nil {
 		return errors.New(fmt.Sprint("error while prepare update response code: ", er.Error()))
 	}
@@ -276,7 +304,7 @@ func (d *DatatransRepoMysqlImpl) ChangeRcOnReversedData(rc, stan string) (er err
 		_ = stmt.Close()
 	}()
 
-	if _, er = stmt.Exec(rc, stan); er != nil {
+	if _, er = stmt.Exec(rc, stan, transId); er != nil {
 		return errors.New(fmt.Sprint("error while update response code: ", er.Error()))
 	}
 
@@ -297,4 +325,25 @@ func (d *DatatransRepoMysqlImpl) RollbackDuplicate(stan string) (er error) {
 	}
 
 	return nil
+}
+
+func (d *DatatransRepoMysqlImpl) AddStanReference(reference entities.StanReference) (er error) {
+
+	stmt, er := d.conn.Prepare(`INSERT INTO stan_ref_retrans(trans_id, ref_stan, stan) VALUES(?,?,?)`)
+	if er != nil {
+		return errors.New(fmt.Sprint("error while prepare add stan reference: ", er.Error()))
+	}
+	defer func() {
+		_ = stmt.Close()
+	}()
+
+	if _, er = stmt.Exec(
+		reference.Trans_id,
+		reference.Ref_Stan,
+		reference.Stan,
+	); er != nil {
+		return errors.New(fmt.Sprint("error while add stan reference: ", er.Error()))
+	} else {
+		return nil
+	}
 }

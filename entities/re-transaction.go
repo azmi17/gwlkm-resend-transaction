@@ -1,6 +1,7 @@
 package entities
 
 type TransHistory struct {
+	Trans_id                    int
 	Stan                        string
 	Ref_Stan                    string
 	Tgl_Trans_Str               string
@@ -77,6 +78,12 @@ type CoreAddr struct {
 	BankCode string
 	IPaddr   string
 	TCPPort  int
+}
+
+type StanReference struct {
+	Trans_id int
+	Ref_Stan string
+	Stan     string
 }
 
 type TransHistoryRequest struct {
