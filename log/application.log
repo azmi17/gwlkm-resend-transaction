@@ -1,0 +1,1104 @@
+2022-10-13 09:38:17	[LOG]:	Connecting to database...
+2022-10-13 09:38:17	[LOG]:	Database Connected
+2022-10-13 09:38:17	[LOG]:	Service Started
+2022-10-13 09:38:17	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 09:48:28	[LOG]:	RECV, [::1]:60622, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 09:52:40	[LOG]:	Connecting to database...
+2022-10-13 09:52:40	[LOG]:	Database Connected
+2022-10-13 09:52:40	[LOG]:	Service Started
+2022-10-13 09:52:40	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 09:52:49	[LOG]:	RECV, [::1]:61091, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 09:53:24	[LOG]:	RECV, [::1]:61091, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 09:53:24	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][100041274590]
+[012][20220926132140]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 09:53:26	[ERR]:	(appio.go:12):	re-transaction failed: Connection refused
+2022-10-13 09:53:26	[LOG]:	SEND, [::1]:61091, /api/v1/retransaction/unreversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "re-transaction failed: Connection refused"
+}
+2022-10-13 10:07:51	[LOG]:	Connecting to database...
+2022-10-13 10:07:51	[LOG]:	Database Connected
+2022-10-13 10:07:51	[LOG]:	Service Started
+2022-10-13 10:07:51	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:07:58	[LOG]:	RECV, [::1]:55106, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:07:58	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][100041274590]
+[012][20220926132140]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:08:01	[ERR]:	(appio.go:12):	re-transaction failed: Connection refused
+2022-10-13 10:08:01	[LOG]:	SEND, [::1]:55106, /api/v1/retransaction/unreversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "re-transaction failed: Connection refused"
+}
+2022-10-13 10:08:11	[LOG]:	RECV, [::1]:55106, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274111
+
+2022-10-13 10:08:11	[ERR]:	(appio.go:12):	no records found
+2022-10-13 10:08:11	[LOG]:	SEND, [::1]:55106, /api/v1/retransaction/unreversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "no records found"
+}
+2022-10-13 10:08:26	[LOG]:	RECV, [::1]:55106, POST /api/v1/retransaction/reversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274111
+
+2022-10-13 10:08:26	[ERR]:	(appio.go:12):	no records found
+2022-10-13 10:08:26	[LOG]:	SEND, [::1]:55106, /api/v1/retransaction/reversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "no records found",
+    "new_stan": ""
+}
+2022-10-13 10:09:19	[LOG]:	Connecting to database...
+2022-10-13 10:09:19	[LOG]:	Database Connected
+2022-10-13 10:09:19	[LOG]:	Service Started
+2022-10-13 10:09:19	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:09:43	[LOG]:	RECV, [::1]:56699, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:09:43	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][100041274590]
+[012][20220926132140]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:09:45	[ERR]:	(appio.go:12):	re-transaction failed: Connection refused
+2022-10-13 10:09:45	[LOG]:	SEND, [::1]:56699, /api/v1/retransaction/unreversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "re-transaction failed: Connection refused"
+}
+2022-10-13 10:10:29	[LOG]:	Connecting to database...
+2022-10-13 10:10:29	[LOG]:	Database Connected
+2022-10-13 10:10:29	[LOG]:	Service Started
+2022-10-13 10:10:29	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:10:43	[LOG]:	RECV, [::1]:51141, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:10:43	[ERR]:	(appio.go:12):	no records found
+2022-10-13 10:10:43	[LOG]:	SEND, [::1]:51141, /api/v1/retransaction/unreversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "no records found"
+}
+2022-10-13 10:11:08	[LOG]:	Connecting to database...
+2022-10-13 10:11:08	[LOG]:	Database Connected
+2022-10-13 10:11:08	[LOG]:	Service Started
+2022-10-13 10:11:08	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:11:13	[LOG]:	RECV, [::1]:63490, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:13:32	[LOG]:	Connecting to database...
+2022-10-13 10:13:32	[LOG]:	Database Connected
+2022-10-13 10:13:32	[LOG]:	Service Started
+2022-10-13 10:13:32	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:13:41	[LOG]:	RECV, [::1]:57315, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:13:41	[ERR]:	(appio.go:12):	no records found
+2022-10-13 10:13:41	[LOG]:	SEND, [::1]:57315, /api/v1/retransaction/unreversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "no records found"
+}
+2022-10-13 10:14:05	[LOG]:	Connecting to database...
+2022-10-13 10:14:05	[LOG]:	Database Connected
+2022-10-13 10:14:05	[LOG]:	Service Started
+2022-10-13 10:14:05	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:14:16	[LOG]:	RECV, [::1]:57023, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:15:36	[LOG]:	Connecting to database...
+2022-10-13 10:15:36	[LOG]:	Database Connected
+2022-10-13 10:15:36	[LOG]:	Service Started
+2022-10-13 10:15:36	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:15:49	[LOG]:	RECV, [::1]:55353, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:17:15	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][100041274590]
+[012][20220926132140]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:19:02	[ERR]:	(appio.go:12):	re-transaction failed: Connection refused
+2022-10-13 10:19:04	[LOG]:	SEND, [::1]:55353, /api/v1/retransaction/unreversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "re-transaction failed: Connection refused"
+}
+2022-10-13 10:19:43	[LOG]:	Connecting to database...
+2022-10-13 10:19:43	[LOG]:	Database Connected
+2022-10-13 10:19:43	[LOG]:	Service Started
+2022-10-13 10:19:43	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:19:50	[LOG]:	RECV, [::1]:57790, POST /api/v1/retransaction/unreversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:20:02	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][100041274590]
+[012][20220926132140]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:20:02	[LOG]:	RECV:
+ [001][2210]
+[002][bf3840410be300180000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][100041274590]
+[012][20220926132140]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[039][0000]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][Transaksi Sukses!]
+[060][]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:20:02	[LOG]:	SEND, [::1]:57790, /api/v1/retransaction/unreversed, 
+RESPONSE : 
+{
+    "response_code": "0000",
+    "response_message": "Resend transaction succeeded"
+}
+2022-10-13 10:27:57	[LOG]:	Connecting to database...
+2022-10-13 10:27:57	[LOG]:	Database Connected
+2022-10-13 10:27:57	[LOG]:	Service Started
+2022-10-13 10:27:57	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:28:07	[LOG]:	Connecting to database...
+2022-10-13 10:28:07	[LOG]:	Database Connected
+2022-10-13 10:28:07	[LOG]:	Service Started
+2022-10-13 10:28:07	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:28:25	[LOG]:	RECV, [::1]:56933, POST /api/v1/retransaction/reversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274111
+
+2022-10-13 10:28:25	[ERR]:	(appio.go:12):	no records found
+2022-10-13 10:28:25	[LOG]:	SEND, [::1]:56933, /api/v1/retransaction/reversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "no records found",
+    "new_stan": ""
+}
+2022-10-13 10:28:37	[LOG]:	RECV, [::1]:56933, POST /api/v1/retransaction/reversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:28:37	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][721089847763]
+[012][20221013102837]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:28:39	[ERR]:	(appio.go:12):	re-transaction failed: Connection refused
+2022-10-13 10:28:39	[LOG]:	SEND, [::1]:56933, /api/v1/retransaction/reversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "re-transaction failed: Connection refused",
+    "new_stan": "721089847763"
+}
+2022-10-13 10:30:04	[LOG]:	Connecting to database...
+2022-10-13 10:30:04	[LOG]:	Database Connected
+2022-10-13 10:30:04	[LOG]:	Service Started
+2022-10-13 10:30:04	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:30:12	[LOG]:	RECV, [::1]:57735, POST /api/v1/retransaction/reversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 10:31:25	[ERR]:	(appio.go:12):	RC must be 0000
+2022-10-13 10:31:25	[LOG]:	SEND, [::1]:57735, /api/v1/retransaction/reversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "RC must be 0000",
+    "new_stan": ""
+}
+2022-10-13 10:32:37	[LOG]:	Connecting to database...
+2022-10-13 10:32:37	[LOG]:	Database Connected
+2022-10-13 10:32:37	[LOG]:	Service Started
+2022-10-13 10:32:37	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:32:49	[LOG]:	RECV, [::1]:65149, POST /api/v1/retransaction/reversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=721089847763
+
+2022-10-13 10:34:29	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][721089847763]
+[012][20221013102837]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:34:31	[ERR]:	(appio.go:12):	re-transaction failed: Connection refused
+2022-10-13 10:34:31	[LOG]:	SEND, [::1]:65149, /api/v1/retransaction/reversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "re-transaction failed: Connection refused",
+    "new_stan": "721089847763"
+}
+2022-10-13 10:36:04	[LOG]:	Connecting to database...
+2022-10-13 10:36:04	[LOG]:	Database Connected
+2022-10-13 10:36:04	[LOG]:	Service Started
+2022-10-13 10:36:04	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:37:12	[LOG]:	RECV, [::1]:53649, POST /api/v1/retransaction/reversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=721089847763
+
+2022-10-13 10:37:13	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][721089847763]
+[012][20221013102837]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:37:13	[LOG]:	RECV:
+ [001][2210]
+[002][bf3840410be300180000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][721089847763]
+[012][20221013102837]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[039][0000]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][Transaksi Sukses!]
+[060][]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:37:13	[LOG]:	SEND, [::1]:53649, /api/v1/retransaction/reversed, 
+RESPONSE : 
+{
+    "response_code": "0000",
+    "response_message": "Resend transaction succeeded",
+    "new_stan": "721089847763"
+}
+2022-10-13 10:37:16	[LOG]:	RECV, [::1]:53649, POST /api/v1/retransaction/reversed, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=721089847763
+
+2022-10-13 10:37:16	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][721089847763]
+[012][20221013102837]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:37:16	[LOG]:	RECV:
+ [001][2210]
+[002][bf3840410be300180000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][721089847763]
+[012][20221013102837]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[039][1111]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][Transaksi sudah dilakukan]
+[060][]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 10:37:16	[ERR]:	(appio.go:12):	Transaksi sudah dilakukan
+2022-10-13 10:37:16	[LOG]:	SEND, [::1]:53649, /api/v1/retransaction/reversed, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "Transaksi sudah dilakukan",
+    "new_stan": "721089847763"
+}
+2022-10-13 10:41:27	[LOG]:	Connecting to database...
+2022-10-13 10:41:27	[LOG]:	Database Connected
+2022-10-13 10:41:27	[LOG]:	Service Started
+2022-10-13 10:41:27	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 10:41:33	[LOG]:	RECV, [::1]:51289, GET /api/v1/retransaction/version, 
+HEADER :
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=0
+empty body
+2022-10-13 10:41:33	[LOG]:	SEND, [::1]:51289, /api/v1/retransaction/version, 
+RESPONSE : 
+{
+    "App Author": "Azmi Farhan",
+    "App Description": "e-Channel Retransaction API Endpoint",
+    "App Name": "e-Channel Recycle Transaction",
+    "App Release Date": "13/10/2022 10:37",
+    "App Version": "1.3.2"
+}
+2022-10-13 16:03:29	[LOG]:	Connecting to database...
+2022-10-13 16:03:29	[LOG]:	Database Connected
+2022-10-13 16:03:29	[LOG]:	Service Started
+2022-10-13 16:03:29	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 17:39:26	[LOG]:	Connecting to database...
+2022-10-13 17:39:26	[LOG]:	Database Connected
+2022-10-13 17:39:26	[LOG]:	Service Started
+2022-10-13 17:39:26	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 17:40:10	[LOG]:	RECV, [::1]:59709, GET /api/v1/retransaction/version, 
+HEADER :
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=0
+empty body
+2022-10-13 17:40:10	[LOG]:	SEND, [::1]:59709, /api/v1/retransaction/version, 
+RESPONSE : 
+{
+    "App Author": "Azmi Farhan",
+    "App Description": "e-Channel Retransaction API Endpoint",
+    "App Name": "e-Channel Recycle Transaction",
+    "App Release Date": "13/10/2022 10:37",
+    "App Version": "1.3.2"
+}
+2022-10-13 17:40:31	[LOG]:	RECV, [::1]:59709, POST /api/v1/retransaction/resend, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 17:40:31	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174031]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:40:33	[ERR]:	(appio.go:12):	re-transaction failed: Connection refused
+2022-10-13 17:40:33	[LOG]:	SEND, [::1]:59709, /api/v1/retransaction/resend, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "re-transaction failed: Connection refused",
+    "new_stan": "RT8647427818"
+}
+2022-10-13 17:40:47	[LOG]:	RECV, [::1]:59709, POST /api/v1/retransaction/resend, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=100041274590
+
+2022-10-13 17:40:47	[ERR]:	(appio.go:12):	RC must be 0000
+2022-10-13 17:40:47	[LOG]:	SEND, [::1]:59709, /api/v1/retransaction/resend, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "RC must be 0000",
+    "new_stan": ""
+}
+2022-10-13 17:41:05	[LOG]:	RECV, [::1]:59709, POST /api/v1/retransaction/resend, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=RT8647427818
+
+2022-10-13 17:41:05	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174105]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:41:06	[LOG]:	RECV:
+ [001][2210]
+[002][bf3840410be300180000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174105]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[039][0000]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][Transaksi Sukses!]
+[060][]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:41:06	[LOG]:	SEND, [::1]:59709, /api/v1/retransaction/resend, 
+RESPONSE : 
+{
+    "response_code": "0000",
+    "response_message": "Resend transaction succeeded",
+    "new_stan": "RT8647427818"
+}
+2022-10-13 17:41:10	[LOG]:	RECV, [::1]:59709, POST /api/v1/retransaction/resend, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=RT8647427818
+
+2022-10-13 17:41:10	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174110]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:41:10	[LOG]:	RECV:
+ [001][2210]
+[002][bf3840410be300180000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174110]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[039][1111]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][Transaksi sudah dilakukan]
+[060][]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:41:10	[ERR]:	(appio.go:12):	Transaksi sudah dilakukan
+2022-10-13 17:41:10	[LOG]:	SEND, [::1]:59709, /api/v1/retransaction/resend, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "Transaksi sudah dilakukan",
+    "new_stan": "RT8647427818"
+}
+2022-10-13 17:45:46	[LOG]:	Connecting to database...
+2022-10-13 17:45:46	[LOG]:	Database Connected
+2022-10-13 17:45:46	[LOG]:	Service Started
+2022-10-13 17:45:46	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 17:47:54	[LOG]:	RECV, [::1]:61609, POST /api/v1/retransaction/resend, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=RT8647427818
+
+2022-10-13 17:47:55	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174754]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:47:55	[LOG]:	RECV:
+ [001][2210]
+[002][bf3840410be300180000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174754]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[039][0000]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][Transaksi Sukses!]
+[060][]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:47:55	[LOG]:	SEND, [::1]:61609, /api/v1/retransaction/resend, 
+RESPONSE : 
+{
+    "response_code": "0000",
+    "response_message": "Resend transaction succeeded",
+    "new_stan": "RT8647427818"
+}
+2022-10-13 17:47:59	[LOG]:	RECV, [::1]:61609, POST /api/v1/retransaction/resend, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=RT8647427818
+
+2022-10-13 17:47:59	[LOG]:	SEND:
+ [001][2200]
+[002][bf38404109e300080000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174759]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][5000]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:47:59	[LOG]:	RECV:
+ [001][2210]
+[002][bf3840410be300180000000013000000]
+[003][300700]
+[004][0000000000005350]
+[005][000000000500]
+[006][000000000000]
+[007][2209261321]
+[008][00000000]
+[011][RT8647427818]
+[012][20221013174759]
+[013][1013]
+[018][0017]
+[026][0020]
+[032][0517]
+[037][655116702240]
+[039][1111]
+[040][000]
+[041][0100029         ]
+[042][               ]
+[043][]
+[047][]
+[048][Transaksi sudah dilakukan]
+[060][]
+[061][04096d5c5bcb112dd88eb73be8466205fc684a1436907f0b43fd481c106f50cb]
+[100][400400]
+[103][081383248368]
+[104][S5]
+
+2022-10-13 17:47:59	[ERR]:	(appio.go:12):	Transaksi sudah dilakukan
+2022-10-13 17:47:59	[LOG]:	SEND, [::1]:61609, /api/v1/retransaction/resend, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "Transaksi sudah dilakukan",
+    "new_stan": "RT8647427818"
+}
+2022-10-13 18:12:31	[LOG]:	Connecting to database...
+2022-10-13 18:12:31	[LOG]:	Database Connected
+2022-10-13 18:12:31	[LOG]:	Service Started
+2022-10-13 18:12:31	[LOG]:	[HTTP] Listening at: 4715
+2022-10-13 18:12:42	[LOG]:	RECV, [::1]:49193, POST /api/v1/retransaction/resend, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=RT8647427X18
+
+2022-10-13 18:12:42	[ERR]:	(appio.go:12):	no records found
+2022-10-13 18:12:42	[LOG]:	SEND, [::1]:49193, /api/v1/retransaction/resend, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "no records found",
+    "new_stan": ""
+}
+2022-10-13 18:14:11	[LOG]:	RECV, [::1]:49193, POST /api/v1/retransaction/resend, 
+HEADER :
+[Content-Type]=application/x-www-form-urlencoded
+[User-Agent]=PostmanRuntime/7.29.2
+[Content-Length]=17
+
+FORM :
+[stan]=RT8647427X18
+
+2022-10-13 18:14:11	[ERR]:	(appio.go:12):	no records found
+2022-10-13 18:14:11	[LOG]:	SEND, [::1]:49193, /api/v1/retransaction/resend, 
+RESPONSE : 
+{
+    "response_code": "1111",
+    "response_message": "no records found",
+    "new_stan": ""
+}
