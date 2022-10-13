@@ -101,9 +101,9 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 	reTransRepo.RecycleReversedTransaction(&isoMsg)
 	if isoMsg.ResponseCode == constant.Success {
 		er = dataRepo.ChangeRcOnReversedData(constant.Success, newTrx.Stan, newTrx.Trans_id)
-		if er != nil {
-			return newStan, err.InternalServiceError
-		}
+		// if er != nil {
+		// 	return newStan, err.InternalServiceError
+		// }
 	} else {
 		er = errors.New(isoMsg.Msg)
 	}
