@@ -35,7 +35,7 @@ func (r *retransactionUsecase) ResendTransaction(stan string) (er error) {
 	// RECYCLE TRANSACTION
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleTransaction(&data)
-	if data.ResponseCode != "0000" {
+	if data.ResponseCode != constant.Success {
 		return errors.New(data.Msg)
 	} else {
 		return nil
@@ -57,7 +57,7 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 	}
 
 	// Validation chk: If ref_stan == ""  & RC is not 0000
-	if reversedData.Ref_Stan == "" && reversedData.Response_Code != "0000" {
+	if reversedData.Ref_Stan == "" && reversedData.Response_Code != constant.Success {
 		return newStan, err.RCMustBeSuccess
 	}
 
@@ -70,7 +70,7 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 
 	// If not repeat
 	if !isRepeat {
-		// Dupolicating & assign new value from origin record..
+		// Duplicate & assign new value from origin record..
 		newTrx.Stan = helper.GenerateSTAN()
 		newStan = newTrx.Stan
 		newTrx.Ref_Stan = reversedData.Stan

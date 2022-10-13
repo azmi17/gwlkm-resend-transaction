@@ -3,7 +3,6 @@ package handler
 import (
 	"gwlkm-resend-transaction/delivery/handler/httpio"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,11 +13,11 @@ func AppInfo(ctx *gin.Context) {
 	httpio.Recv()
 
 	appInfo := map[string]interface{}{
-		"App Name":         os.Getenv("application.name"),
-		"App Description":  os.Getenv("application.desc"),
-		"App Version":      os.Getenv("application.version"),
-		"App Author":       os.Getenv("application.author"),
-		"App Release Date": "12/10/2022 21:19",
+		"App Name":         "e-Channel Recycle Transaction",
+		"App Description":  "e-Channel Retransaction API Endpoint",
+		"App Version":      "1.3.2",
+		"App Author":       "Azmi Farhan",
+		"App Release Date": "13/10/2022 10:37",
 	}
 
 	httpio.Response(http.StatusOK, appInfo)

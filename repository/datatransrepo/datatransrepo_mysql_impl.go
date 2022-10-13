@@ -23,7 +23,7 @@ func (d *DatatransRepoMysqlImpl) GetData(stan string) (data entities.MsgTransHis
 		processing_code,
 		bank_code,
 		msg
-		FROM trans_history WHERE stan= ? AND dc='d' AND response_code='0000'`, stan)
+		FROM trans_history WHERE stan= ? AND dc='d' LIMIT 1`, stan)
 
 	er = row.Scan(
 		&data.MTI,
@@ -33,7 +33,7 @@ func (d *DatatransRepoMysqlImpl) GetData(stan string) (data entities.MsgTransHis
 	)
 	if er != nil {
 		if er == sql.ErrNoRows {
-			return data, nil
+			return data, err.NoRecord
 		} else {
 			return data, errors.New(fmt.Sprint("error while get data: ", er.Error()))
 		}
@@ -66,7 +66,7 @@ func (d *DatatransRepoMysqlImpl) GetServeAddr(bankCode string) (data entities.Co
 }
 
 func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.TransHistory, er error) {
-	// var refStan sql.NullString
+
 	row := d.conn.QueryRow(`SELECT 
 		th.trans_id,
 		th.stan,
@@ -111,7 +111,7 @@ func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.Tra
 		th.inc_notif_status,
 		th.fee_rek_induk
 	FROM trans_history AS th 
-	LEFT JOIN stan_ref_retrans AS sr ON(th.trans_id=sr.trans_id) WHERE th.stan= ? AND dc='d'`, stan)
+	LEFT JOIN stan_ref_retrans AS sr ON(th.trans_id=sr.trans_id) WHERE th.stan= ? AND dc='d' LIMIT 1`, stan)
 
 	er = row.Scan(
 		&data.Trans_id,
@@ -159,7 +159,7 @@ func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.Tra
 	)
 	if er != nil {
 		if er == sql.ErrNoRows {
-			return data, nil
+			return data, err.NoRecord
 		} else {
 			return data, errors.New(fmt.Sprint("error while get reversed data: ", er.Error()))
 		}

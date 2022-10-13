@@ -20,14 +20,15 @@ type retransactionRepoImpl struct {
 
 func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransHistory) (err error) {
 
-	//TODO: Send ISO data to ip & port gwlkm
+	//TODO: Send ISO data to IP & Port GWLKM
 
-	// ISO OBJ INIT..
+	// ISO OBJ INIT
 	isoUnMarshal, err := iso8583uParser.NewISO8583U()
 	if err != nil {
 		entities.PrintError("load package error", err.Error())
 		return
 	}
+	// UNMARSHAL | RE-COMPOSE ISO
 	err = isoUnMarshal.GoUnMarshal(dataTrans.Msg)
 	if err != nil {
 		entities.PrintError(err.Error())
@@ -57,21 +58,21 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 	isoUnMarshal.SetField(103, isoUnMarshal.GetField(103))
 	isoUnMarshal.SetField(104, isoUnMarshal.GetField(104))
 
-	// MARSHAL PROCS..
+	// MARSHAL PROCS
 	isoMsg, err := isoUnMarshal.GoMarshal()
 	if err != nil {
 		entities.PrintError(err.Error())
 		return
 	}
 
-	// INIT CORE-ADDR
+	// CORE ADDRS
 	repo, _ := datatransrepo.NewDatatransRepo()
 	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
 	if err != nil {
 		entities.PrintError(err.Error())
 	}
 
-	// TCP OBJ INIT..
+	// INIT TCP OBJ
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
 	entities.PrintLog("SEND:\n", isoUnMarshal.PrettyPrint())
 	st := client.Send(tcp.SetHeader(isoMsg, 4))
@@ -97,16 +98,16 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 
 func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.MsgTransHistory) (err error) {
 
-	//TODO: Send ISO data to ip & port gwlkm
+	//TODO: Send ISO data to IP & Port GWLKM
 
-	// ISO OBJ INIT..
+	// ISO OBJ
 	isoUnMarshal, err := iso8583uParser.NewISO8583U()
 	if err != nil {
 		entities.PrintError("load package error", err.Error())
 		return
 	}
 
-	//RE-COMPOSE ISO..
+	// UNMARSHAL | RE-COMPOSE ISO
 	err = isoUnMarshal.GoUnMarshal(dataTrans.Msg)
 	if err != nil {
 		entities.PrintError(err.Error())
@@ -136,21 +137,21 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 	isoUnMarshal.SetField(103, isoUnMarshal.GetField(103))
 	isoUnMarshal.SetField(104, isoUnMarshal.GetField(104))
 
-	// MARSHAL PROCS..
+	// MARSHAL PROCS
 	isoMsg, err := isoUnMarshal.GoMarshal()
 	if err != nil {
 		entities.PrintError(err.Error())
 		return
 	}
 
-	// CALL CORE ADDR
+	// CORE ADDRS
 	repo, _ := datatransrepo.NewDatatransRepo()
 	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
 	if err != nil {
 		entities.PrintError(err.Error())
 	}
 
-	// TCP OBJ INIT..
+	// TCP OBJ INIT
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
 	entities.PrintLog("SEND:\n", isoUnMarshal.PrettyPrint())
 	st := client.Send(tcp.SetHeader(isoMsg, 4))
