@@ -15,9 +15,9 @@ func AppInfo(ctx *gin.Context) {
 	appInfo := map[string]interface{}{
 		"App Name":         "e-Channel Recycle Transaction",
 		"App Description":  "e-Channel Retransaction API Endpoint",
-		"App Version":      "1.3.2",
+		"App Version":      "1.4.2",
 		"App Author":       "Azmi Farhan",
-		"App Release Date": "13/10/2022 10:37",
+		"App Release Date": "13/10/2022 17:53",
 	}
 
 	httpio.Response(http.StatusOK, appInfo)

@@ -166,7 +166,7 @@ func TestReversedData(t *testing.T) {
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeRcOnReversedData(constant.Resended, reversedData.Stan, reversedData.Trans_id)
+	err = dataTransRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan, reversedData.Trans_id)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -266,7 +266,7 @@ func TestReversedDataTwo(t *testing.T) {
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeRcOnReversedData(constant.Resended, reversedData.Stan, reversedData.Trans_id)
+	err = dataTransRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan, reversedData.Trans_id)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -339,9 +339,17 @@ func TestReversedDataTwo(t *testing.T) {
 }
 
 func TestGetCurrentDate(t *testing.T) {
-	now := helper.GetCurrentDate()
-	fmt.Println(now)
-	fmt.Println(now[4:8])
+	// now := helper.GetCurrentDate()
+	// fmt.Println(now)
+	// fmt.Println(now[4:8])
+
+	STAN := helper.GenerateSTAN()
+	fmt.Println(STAN)
+	fmt.Println(len(STAN))
+
+	newSTAN := "RT" + STAN[2:12]
+	fmt.Println(newSTAN)
+	fmt.Println(len(newSTAN))
 }
 
 func TestAesCrypto_Encrypt(t *testing.T) {

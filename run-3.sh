@@ -13,8 +13,9 @@ scriptFile=$(readlink -fn $(type -p $0))                # the absolute, derefere
 scriptDir=$(dirname $scriptFile)                        # absolute path of the script directory
 
 # Configure variables below :
+logdate="$(date +'%Y%m%d')"   # get current date  
 app="gwlkm-resend-transaction"
-serviceLogName="gwlkm-resend-transaction_log"
+serviceLogName="gwlkm-resend-transaction_log$logdate"
 serviceName="gwlkm-resend-transaction"
 homedir="/home/gwlkm-resend-transaction"
 

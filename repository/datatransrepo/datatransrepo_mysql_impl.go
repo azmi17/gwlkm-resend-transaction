@@ -286,7 +286,7 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 		if er != nil {
 			return er
 		}
-		er = dataRepo.ChangeRcOnReversedData(constant.Resended, copy.Ref_Stan, copy.Trans_id)
+		er = dataRepo.ChangeRcOnReversedData(constant.Failed, copy.Ref_Stan, copy.Trans_id)
 		if er != nil {
 			return err.InternalServiceError
 		}

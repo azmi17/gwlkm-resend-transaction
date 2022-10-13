@@ -71,11 +71,11 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 	// If not repeat
 	if !isRepeat {
 		// Duplicate & assign new value from origin record..
-		newTrx.Stan = helper.GenerateSTAN()
+		newTrx.Stan = "RT" + helper.GenerateSTAN()[2:12]
 		newStan = newTrx.Stan
 		newTrx.Ref_Stan = reversedData.Stan
 		newTrx.Dc = "d"
-		newTrx.Tgl_Trans_Str = helper.GetCurrentDate()
+		newTrx.Tgl_Trans_Str = reversedData.Tgl_Trans_Str
 		newTrx.Ref = reversedData.Product_Code + newTrx.Stan
 		newTrx.Response_Code = constant.Suspect
 

@@ -121,7 +121,7 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 	isoUnMarshal.SetField(7, isoUnMarshal.GetField(7))
 	isoUnMarshal.SetField(8, isoUnMarshal.GetField(8))
 	isoUnMarshal.SetField(11, dataTrans.Stan)
-	isoUnMarshal.SetField(12, dataTrans.Date)
+	isoUnMarshal.SetField(12, helper.GetCurrentDate())
 	isoUnMarshal.SetField(13, helper.GETMMDD[4:8])
 	isoUnMarshal.SetField(18, isoUnMarshal.GetField(18))
 	isoUnMarshal.SetField(26, isoUnMarshal.GetField(26))
