@@ -9,7 +9,7 @@ type DatatransRepo interface {
 	GetServeAddr(bankCode string) (entities.CoreAddr, error)
 	GetReversedData(stan string) (entities.TransHistory, error)
 	DuplicatingData(copy entities.TransHistory) error
-	ChangeRcOnReversedData(rc, stan string, transId int) error
-	RollbackDuplicate(stan string) error
+	ChangeResponseCode(rc, stan string, transId int) error
 	AddStanReference(copy entities.StanReference) error
+	GetRetransTxInfo(stan string) (entities.RetransTxInfo, error)
 }

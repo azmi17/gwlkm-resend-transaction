@@ -166,7 +166,7 @@ func TestReversedData(t *testing.T) {
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan, reversedData.Trans_id)
+	err = dataTransRepo.ChangeResponseCode(constant.Failed, reversedData.Stan, reversedData.Trans_id)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -266,7 +266,7 @@ func TestReversedDataTwo(t *testing.T) {
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeRcOnReversedData(constant.Failed, reversedData.Stan, reversedData.Trans_id)
+	err = dataTransRepo.ChangeResponseCode(constant.Failed, reversedData.Stan, reversedData.Trans_id)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

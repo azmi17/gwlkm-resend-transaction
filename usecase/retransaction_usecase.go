@@ -13,6 +13,8 @@ import (
 type RetransactionUsecase interface {
 	ResendTransaction(stan string) error
 	ResendReversedTransaction(stan string) (string, error)
+	GetRetransTxInfo(stan string) (entities.RetransTxInfo, error)
+	ChangeResponseCode(entities.ChangeResponseCode) error
 }
 
 type retransactionUsecase struct{}
@@ -100,7 +102,7 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleReversedTransaction(&isoMsg)
 	if isoMsg.ResponseCode == constant.Success {
-		er = dataRepo.ChangeRcOnReversedData(constant.Success, newTrx.Stan, newTrx.Trans_id)
+		er = dataRepo.ChangeResponseCode(constant.Success, newTrx.Stan, newTrx.Trans_id)
 		// if er != nil {
 		// 	return newStan, err.InternalServiceError
 		// }
@@ -109,4 +111,20 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 	}
 
 	return newStan, er
+}
+func (r *retransactionUsecase) GetRetransTxInfo(stan string) (txInfo entities.RetransTxInfo, er error) {
+	dataRepo, _ := datatransrepo.NewDatatransRepo()
+	if txInfo, er = dataRepo.GetRetransTxInfo(stan); er != nil {
+		return txInfo, er
+	}
+	return txInfo, nil
+}
+
+func (r *retransactionUsecase) ChangeResponseCode(payload entities.ChangeResponseCode) (er error) {
+	dataRepo, _ := datatransrepo.NewDatatransRepo()
+	er = dataRepo.ChangeResponseCode(payload.RC, payload.Stan, 0)
+	if er != nil {
+		return er
+	}
+	return nil
 }

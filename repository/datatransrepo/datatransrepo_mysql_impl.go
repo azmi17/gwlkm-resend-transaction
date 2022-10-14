@@ -286,7 +286,7 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 		if er != nil {
 			return er
 		}
-		er = dataRepo.ChangeRcOnReversedData(constant.Failed, copy.Ref_Stan, copy.Trans_id)
+		er = dataRepo.ChangeResponseCode(constant.Failed, copy.Ref_Stan, copy.Trans_id)
 		if er != nil {
 			return err.InternalServiceError
 		}
@@ -295,35 +295,39 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 	}
 }
 
-func (d *DatatransRepoMysqlImpl) ChangeRcOnReversedData(rc, stan string, transId int) (er error) {
-	stmt, er := d.conn.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND dc='d' AND trans_id = ?`)
-	if er != nil {
-		return errors.New(fmt.Sprint("error while prepare update response code: ", er.Error()))
+func (d *DatatransRepoMysqlImpl) ChangeResponseCode(rc, stan string, transId int) (er error) {
+	var stmt *sql.Stmt
+	if transId == 0 {
+		// Search STAN is exist or not (?)
+		dataRepo, _ := NewDatatransRepo()
+		_, er = dataRepo.GetRetransTxInfo(stan)
+		if er != nil {
+			return err.NoRecord
+		}
+		// Upd procs..
+		stmt, er = d.conn.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND dc='d'`)
+		if er != nil {
+			return errors.New(fmt.Sprint("error while prepare update response code: ", er.Error()))
+		}
+		defer func() {
+			_ = stmt.Close()
+		}()
+		if _, er = stmt.Exec(rc, stan); er != nil {
+			return errors.New(fmt.Sprint("error while update response code: ", er.Error()))
+		}
+	} else {
+		stmt, er = d.conn.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND trans_id = ? AND dc='d'`)
+		if er != nil {
+			return errors.New(fmt.Sprint("error while prepare update retrans response code: ", er.Error()))
+		}
+		defer func() {
+			_ = stmt.Close()
+		}()
+
+		if _, er = stmt.Exec(rc, stan, transId); er != nil {
+			return errors.New(fmt.Sprint("error while update response code: ", er.Error()))
+		}
 	}
-	defer func() {
-		_ = stmt.Close()
-	}()
-
-	if _, er = stmt.Exec(rc, stan, transId); er != nil {
-		return errors.New(fmt.Sprint("error while update response code: ", er.Error()))
-	}
-
-	return nil
-}
-
-func (d *DatatransRepoMysqlImpl) RollbackDuplicate(stan string) (er error) {
-	stmt, er := d.conn.Prepare("DELETE FROM trans_history WHERE ref_stan = ?")
-	if er != nil {
-		return errors.New(fmt.Sprint("error while prepare delete duplicated transaction: ", er.Error()))
-	}
-	defer func() {
-		_ = stmt.Close()
-	}()
-
-	if _, er := stmt.Exec(stan); er != nil {
-		return errors.New(fmt.Sprint("error while delete duplicated transaction: ", er.Error()))
-	}
-
 	return nil
 }
 
@@ -346,4 +350,40 @@ func (d *DatatransRepoMysqlImpl) AddStanReference(reference entities.StanReferen
 	} else {
 		return nil
 	}
+}
+
+func (d *DatatransRepoMysqlImpl) GetRetransTxInfo(stan string) (txInfo entities.RetransTxInfo, er error) {
+	row := d.conn.QueryRow(`SELECT 
+		th.trans_id,
+		th.subscriber_id,
+		th.stan,
+		COALESCE(sr.ref_stan, '') as ref_stan,
+		DATE_FORMAT(th.tgl_trans_str, "%d/%m/%Y") AS tgl_trans,
+		th.response_code,
+		th.bank_code,
+		th.rek_id,
+		th.amount,
+		th.ref AS kuitansi
+	FROM trans_history AS th 
+	LEFT JOIN stan_ref_retrans AS sr ON(th.trans_id=sr.trans_id) WHERE th.stan= ? AND dc='d' LIMIT 1`, stan)
+	er = row.Scan(
+		&txInfo.Trans_Id,
+		&txInfo.Idpel,
+		&txInfo.Stan,
+		&txInfo.Ref_Stan,
+		&txInfo.Tgl_Trans_Str,
+		&txInfo.Response_Code,
+		&txInfo.BankCode,
+		&txInfo.RekID,
+		&txInfo.Amount,
+		&txInfo.Kuitansi,
+	)
+	if er != nil {
+		if er == sql.ErrNoRows {
+			return txInfo, err.NoRecord
+		} else {
+			return txInfo, errors.New(fmt.Sprint("error while get retrans data: ", er.Error()))
+		}
+	}
+	return
 }
