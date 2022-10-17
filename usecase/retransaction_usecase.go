@@ -86,6 +86,7 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 		if er != nil {
 			return newStan, er
 		}
+
 	}
 
 	// Extracting TransHistory into MsgTransHistory..
@@ -102,10 +103,10 @@ func (r *retransactionUsecase) ResendReversedTransaction(stan string) (newStan s
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleReversedTransaction(&isoMsg)
 	if isoMsg.ResponseCode == constant.Success {
-		er = dataRepo.ChangeResponseCode(constant.Success, newTrx.Stan, newTrx.Trans_id)
-		// if er != nil {
-		// 	return newStan, err.InternalServiceError
-		// }
+		er = dataRepo.ChangeResponseCode(constant.Success, newTrx.Stan, 0)
+		if er != nil {
+			return newStan, err.InternalServiceError
+		}
 	} else {
 		er = errors.New(isoMsg.Msg)
 	}

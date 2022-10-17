@@ -298,20 +298,24 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 func (d *DatatransRepoMysqlImpl) ChangeResponseCode(rc, stan string, transId int) (er error) {
 	var stmt *sql.Stmt
 	if transId == 0 {
+
 		// Search STAN is exist or not (?)
 		dataRepo, _ := NewDatatransRepo()
 		_, er = dataRepo.GetRetransTxInfo(stan)
 		if er != nil {
 			return err.NoRecord
 		}
+
 		// Upd procs..
 		stmt, er = d.conn.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND dc='d'`)
 		if er != nil {
 			return errors.New(fmt.Sprint("error while prepare update response code: ", er.Error()))
 		}
+
 		defer func() {
 			_ = stmt.Close()
 		}()
+
 		if _, er = stmt.Exec(rc, stan); er != nil {
 			return errors.New(fmt.Sprint("error while update response code: ", er.Error()))
 		}
@@ -320,6 +324,7 @@ func (d *DatatransRepoMysqlImpl) ChangeResponseCode(rc, stan string, transId int
 		if er != nil {
 			return errors.New(fmt.Sprint("error while prepare update retrans response code: ", er.Error()))
 		}
+
 		defer func() {
 			_ = stmt.Close()
 		}()
