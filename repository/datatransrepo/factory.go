@@ -9,11 +9,11 @@ import (
 
 func NewDatatransRepo() (DatatransRepo, error) {
 
-	conn := databasefactory.AppDb.GetConnection()
-
-	currentDriver := databasefactory.AppDb.GetDriverName()
+	conn1 := databasefactory.AppDb1.GetConnection()
+	currentDriver := databasefactory.AppDb1.GetDriverName()
 	if currentDriver == drivers.MYSQL {
-		return newDatatransRepoMysqlImpl(conn.(*sql.DB)), nil
+		conn2 := databasefactory.AppDb2.GetConnection()
+		return newDatatransRepoMysqlImpl(conn1.(*sql.DB), conn2.(*sql.DB)), nil
 	} else {
 		return nil, errors.New("unimplemented database driver")
 	}

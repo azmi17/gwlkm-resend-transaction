@@ -73,20 +73,40 @@ func LoadConfiguration(isReload bool) {
 
 func PrepareDatabase() {
 	var er error
-	databasefactory.AppDb, er = databasefactory.GetDatabase() // init db 1
 
+	// # DB 1
+	databasefactory.AppDb1, er = databasefactory.GetDatabase()
+	databasefactory.AppDb1.SetEnvironmentVariablePrefix("ech.")
 	if er != nil {
 		glg.Fatal(er.Error())
 	}
 
-	_ = glg.Log("Connecting to database...")
-	if er = databasefactory.AppDb.Connect(); er != nil {
-		_ = glg.Error("Connection to database failed : ", er.Error())
+	_ = glg.Log("Connecting to echannelv3...")
+	if er = databasefactory.AppDb1.Connect(); er != nil {
+		_ = glg.Error("Connection to echannelv3 failed : ", er.Error())
 		os.Exit(1)
 	}
 
-	if er = databasefactory.AppDb.Ping(); er != nil {
-		_ = glg.Error("Cannot ping database : ", er.Error())
+	if er = databasefactory.AppDb1.Ping(); er != nil {
+		_ = glg.Error("Cannot ping echannelv3 : ", er.Error())
+		os.Exit(1)
+	}
+
+	// # DB 2
+	databasefactory.AppDb2, er = databasefactory.GetDatabase()
+	databasefactory.AppDb2.SetEnvironmentVariablePrefix("apx.")
+	if er != nil {
+		glg.Fatal(er.Error())
+	}
+
+	_ = glg.Log("Connecting to apex..")
+	if er = databasefactory.AppDb2.Connect(); er != nil {
+		_ = glg.Error("Connection to apex failed: ", er.Error())
+		os.Exit(1)
+	}
+
+	if er = databasefactory.AppDb2.Ping(); er != nil {
+		_ = glg.Error("Cannot ping apex: ", er.Error())
 		os.Exit(1)
 	}
 

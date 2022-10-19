@@ -1,6 +1,6 @@
 package databasefactory
 
-var AppDb Database
+var AppDb1, AppDb2 Database
 
 type Database interface {
 	Connect() error

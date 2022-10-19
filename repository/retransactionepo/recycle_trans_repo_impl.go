@@ -159,7 +159,7 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 	}
 
 	// TCP OBJ INIT
-	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
+	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 80)
 	entities.PrintLog("SEND:\n", iso.PrettyPrint())
 	st := client.Send(tcp.SetHeader(isoMsg, 4))
 
