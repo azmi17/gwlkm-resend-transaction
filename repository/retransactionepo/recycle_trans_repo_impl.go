@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/helper"
-	"gwlkm-resend-transaction/repository/datatransrepo"
+	"gwlkm-resend-transaction/repository/echanneltransrepo"
 
 	iso8583uParser "github.com/randyardiansyah25/iso8583u/parser"
 	"github.com/randyardiansyah25/libpkg/net/tcp"
@@ -18,7 +18,7 @@ func NewRetransactionRepo() RetransactionRepo {
 type retransactionRepoImpl struct {
 }
 
-func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransHistory) (err error) {
+func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessageBody) (err error) {
 
 	//TODO: Send ISO data to IP & Port GWLKM
 
@@ -66,7 +66,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 	}
 
 	// CORE ADDRS
-	repo, _ := datatransrepo.NewDatatransRepo()
+	repo, _ := echanneltransrepo.NewEchannelTransRepo()
 	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
 	if err != nil {
 		entities.PrintError(err.Error())
@@ -96,7 +96,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.MsgTransH
 	return nil
 }
 
-func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.MsgTransHistory) (err error) {
+func (r *retransactionRepoImpl) RecycleGwlkmTransaction(dataTrans *entities.IsoMessageBody) (err error) {
 
 	//TODO: Send ISO data to IP & Port GWLKM
 
@@ -151,8 +151,8 @@ func (r *retransactionRepoImpl) RecycleReversedTransaction(dataTrans *entities.M
 		return
 	}
 
-	// CORE ADDRS
-	repo, _ := datatransrepo.NewDatatransRepo()
+	// GET CORE ADDRS
+	repo, _ := echanneltransrepo.NewEchannelTransRepo()
 	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
 	if err != nil {
 		entities.PrintError(err.Error())

@@ -1,4 +1,4 @@
-package datatransrepo
+package echanneltransrepo
 
 import (
 	"database/sql"
@@ -6,23 +6,24 @@ import (
 	"fmt"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/entities/err"
+	"gwlkm-resend-transaction/entities/web"
 	"gwlkm-resend-transaction/helper"
+	"gwlkm-resend-transaction/repository/apextransrepo"
 	"gwlkm-resend-transaction/repository/constant"
 )
 
-func newDatatransRepoMysqlImpl(conn1, conn2 *sql.DB) DatatransRepo {
-	return &DatatransRepoMysqlImpl{
-		db1: conn1,
-		db2: conn2,
+func newEchannelTransRepoMysqlImpl(echannelConn *sql.DB) EchannelTransRepo {
+	return &EchannelTransRepoMysqlImpl{
+		echannelDb: echannelConn,
 	}
 }
 
-type DatatransRepoMysqlImpl struct {
-	db1, db2 *sql.DB
+type EchannelTransRepoMysqlImpl struct {
+	echannelDb *sql.DB
 }
 
-func (d *DatatransRepoMysqlImpl) GetData(stan string) (data entities.MsgTransHistory, er error) {
-	row := d.db1.QueryRow(`SELECT 
+func (e *EchannelTransRepoMysqlImpl) GetData(stan string) (data entities.IsoMessageBody, er error) {
+	row := e.echannelDb.QueryRow(`SELECT 
 		mti,
 		processing_code,
 		bank_code,
@@ -46,8 +47,8 @@ func (d *DatatransRepoMysqlImpl) GetData(stan string) (data entities.MsgTransHis
 	return
 }
 
-func (d *DatatransRepoMysqlImpl) GetServeAddr(bankCode string) (data entities.CoreAddr, er error) {
-	row := d.db1.QueryRow(`SELECT 
+func (e *EchannelTransRepoMysqlImpl) GetServeAddr(bankCode string) (data entities.CoreAddrInfo, er error) {
+	row := e.echannelDb.QueryRow(`SELECT 
 		bank_code,
 		ip_addr,
 		ip_port
@@ -69,9 +70,9 @@ func (d *DatatransRepoMysqlImpl) GetServeAddr(bankCode string) (data entities.Co
 	return
 }
 
-func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.TransHistory, er error) {
+func (e *EchannelTransRepoMysqlImpl) GetOriginData(stan string) (data entities.TransHistory, er error) {
 
-	row := d.db1.QueryRow(`SELECT 
+	row := e.echannelDb.QueryRow(`SELECT 
 		th.trans_id,
 		th.stan,
 		COALESCE(sr.ref_stan, '') as ref_stan,
@@ -177,9 +178,9 @@ func (d *DatatransRepoMysqlImpl) GetReversedData(stan string) (data entities.Tra
 	return
 }
 
-func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er error) {
+func (e *EchannelTransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er error) {
 
-	stmt, er := d.db1.Prepare(`INSERT INTO trans_history(
+	stmt, er := e.echannelDb.Prepare(`INSERT INTO trans_history(
 		stan,
 		tgl_trans_str,
 		bank_code,
@@ -280,8 +281,8 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 		}
 
 		// below is to add ref_stan to stan_ref_retrans and change response_code belonging to the first record..
-		dataRepo, _ := NewDatatransRepo()
-		addStanReference := entities.StanReference{
+		dataRepo, _ := NewEchannelTransRepo()
+		addStanReference := entities.StanReferences{
 			Trans_id: int(lastId),
 			Ref_Stan: copy.Ref_Stan,
 			Stan:     copy.Stan,
@@ -290,38 +291,33 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 		if er != nil {
 			return er
 		}
-		er = dataRepo.ChangeResponseCode(constant.Failed, copy.Ref_Stan, copy.Trans_id)
+		er = dataRepo.ChangeResponseCode(constant.Resend, copy.Ref_Stan, copy.Trans_id)
 		if er != nil {
 			return err.InternalServiceError
 		}
 
-		//TODO: Recycle apex transaction..
-		// Get Trans ID
-		transId, err := dataRepo.GetTransIdApx()
-		if er != nil {
-			return err
-		}
+		// TODO: Recycle apex transaction..
+		dataRepoApex, _ := apextransrepo.NewApexTransRepo()
 
 		// Get Apx tx..
 		var data entities.TransApx
-		data, er = dataRepo.GetTxInfoApx(copy.Product_Code + copy.Ref_Stan)
+		data, er = dataRepoApex.GetTxInfoApx(copy.Product_Code + copy.Ref_Stan)
 		if er != nil {
 			return er
 		}
 
 		// Create Apx tx..
 		newTrx := data
-		newTrx.Tabtrans_id = transId
 		newTrx.Kuitansi = copy.Product_Code + copy.Stan
 		newTrx.Userid = helper.GetUserIDApp()
-		err = dataRepo.DuplicatingTxApx(newTrx)
-		if err != nil {
+		er = dataRepoApex.DuplicatingTxApx(newTrx)
+		if er != nil {
 			return er
 		}
 
 		// Delete Apx tx..
-		err = dataRepo.DeleteTxApx(copy.Product_Code + copy.Ref_Stan)
-		if err != nil {
+		er = dataRepoApex.DeleteTxApx(copy.Product_Code + copy.Ref_Stan)
+		if er != nil {
 			return er
 		}
 
@@ -329,19 +325,17 @@ func (d *DatatransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory) (er
 	}
 }
 
-func (d *DatatransRepoMysqlImpl) ChangeResponseCode(rc, stan string, transId int) (er error) {
+func (e *EchannelTransRepoMysqlImpl) ChangeResponseCode(rc, stan string, transId int) (er error) {
 	var stmt *sql.Stmt
 	if transId == 0 {
-
 		// Search STAN is exist or not (?)
-		dataRepo, _ := NewDatatransRepo()
+		dataRepo, _ := NewEchannelTransRepo()
 		_, er = dataRepo.GetRetransTxInfo(stan)
 		if er != nil {
 			return err.NoRecord
 		}
 
-		// Upd procs..
-		stmt, er = d.db1.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND dc='d'`)
+		stmt, er = e.echannelDb.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND dc='d'`)
 		if er != nil {
 			return errors.New(fmt.Sprint("error while prepare update response code: ", er.Error()))
 		}
@@ -354,7 +348,7 @@ func (d *DatatransRepoMysqlImpl) ChangeResponseCode(rc, stan string, transId int
 			return errors.New(fmt.Sprint("error while update response code: ", er.Error()))
 		}
 	} else {
-		stmt, er = d.db1.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND trans_id = ? AND dc='d'`)
+		stmt, er = e.echannelDb.Prepare(`UPDATE trans_history SET response_code = ? WHERE stan = ? AND trans_id = ? AND dc='d'`)
 		if er != nil {
 			return errors.New(fmt.Sprint("error while prepare update retrans response code: ", er.Error()))
 		}
@@ -370,9 +364,9 @@ func (d *DatatransRepoMysqlImpl) ChangeResponseCode(rc, stan string, transId int
 	return nil
 }
 
-func (d *DatatransRepoMysqlImpl) AddStanReference(reference entities.StanReference) (er error) {
+func (e *EchannelTransRepoMysqlImpl) AddStanReference(reference entities.StanReferences) (er error) {
 
-	stmt, er := d.db1.Prepare(`INSERT INTO stan_ref_retrans(trans_id, ref_stan, stan) VALUES(?,?,?)`)
+	stmt, er := e.echannelDb.Prepare(`INSERT INTO stan_ref_retrans(trans_id, ref_stan, stan) VALUES(?,?,?)`)
 	if er != nil {
 		return errors.New(fmt.Sprint("error while prepare add stan reference: ", er.Error()))
 	}
@@ -391,8 +385,8 @@ func (d *DatatransRepoMysqlImpl) AddStanReference(reference entities.StanReferen
 	}
 }
 
-func (d *DatatransRepoMysqlImpl) GetRetransTxInfo(stan string) (txInfo entities.RetransTxInfo, er error) {
-	row := d.db1.QueryRow(`SELECT 
+func (e *EchannelTransRepoMysqlImpl) GetRetransTxInfo(stan string) (txInfo web.RetransTxInfo, er error) {
+	row := e.echannelDb.QueryRow(`SELECT 
 		th.trans_id,
 		th.subscriber_id,
 		th.stan,
@@ -417,7 +411,7 @@ func (d *DatatransRepoMysqlImpl) GetRetransTxInfo(stan string) (txInfo entities.
 		&txInfo.RekID,
 		&txInfo.Amount,
 		&txInfo.Kuitansi,
-		&txInfo.Iso_Msg,
+		&txInfo.Iso_Msg_Resp,
 	)
 	if er != nil {
 		if er == sql.ErrNoRows {
@@ -429,187 +423,26 @@ func (d *DatatransRepoMysqlImpl) GetRetransTxInfo(stan string) (txInfo entities.
 	return
 }
 
-func (d *DatatransRepoMysqlImpl) GetTransIdApx() (transId int, er error) {
+func (e *EchannelTransRepoMysqlImpl) UpdateIsoMsg(isoMsg, stan string) (er error) {
 
-	userId := helper.GetUserIDApp()
-	row := d.db2.QueryRow(`SELECT ibs_get_next_id_with_userid(?) AS trans_id`, userId)
-	er = row.Scan(
-		&transId,
-	)
+	dataRepo, _ := NewEchannelTransRepo()
+
+	_, er = dataRepo.GetRetransTxInfo(stan)
 	if er != nil {
-		if er == sql.ErrNoRows {
-			return transId, err.NoRecord
-		} else {
-			return transId, errors.New(fmt.Sprint("error while get data: ", er.Error()))
-		}
+		return err.NoRecord
 	}
-	return transId, nil
-}
 
-func (d *DatatransRepoMysqlImpl) GetTxInfoApx(kuitansi string) (transApx entities.TransApx, er error) {
-	row := d.db2.QueryRow(`SELECT 
-		tabtrans_id,
-		tgl_trans,
-		no_rekening,
-		kode_trans,
-		my_kode_trans,
-		pokok,
-		kuitansi,
-		userid,
-		keterangan,
-		verifikasi,
-		tob,
-		sandi_trans,
-		posted_to_gl,
-		kode_kantor,
-		jam,
-		tgl_real_trans,
-		pay_lkm_source,
-		pay_lkm_norek,
-		pay_idpel,
-		pay_biller_code,
-		pay_product_code
-	FROM tabtrans WHERE kuitansi= ? AND my_kode_trans='200' LIMIT 1`, kuitansi)
-	er = row.Scan(
-		&transApx.Tabtrans_id,
-		&transApx.Tgl_trans,
-		&transApx.No_rekening,
-		&transApx.Kode_trans,
-		&transApx.My_kode_trans,
-		&transApx.Pokok,
-		&transApx.Kuitansi,
-		&transApx.Userid,
-		&transApx.Keterangan,
-		&transApx.Verifikasi,
-		&transApx.Tob,
-		&transApx.Sandi_trans,
-		&transApx.Posted_to_gl,
-		&transApx.Kode_kantor,
-		&transApx.Jam,
-		&transApx.Tgl_real_trans,
-		&transApx.Pay_lkm_source,
-		&transApx.Pay_lkm_norek,
-		&transApx.Pay_idpel,
-		&transApx.Pay_biller_code,
-		&transApx.Pay_product_code,
-	)
+	stmt, er := e.echannelDb.Prepare(`UPDATE trans_history SET msg_response = ? WHERE stan = ? AND dc='d'`)
 	if er != nil {
-		if er == sql.ErrNoRows {
-			return transApx, err.NoRecord
-		} else {
-			return transApx, errors.New(fmt.Sprint("error while get tabtrans data: ", er.Error()))
-		}
+		return errors.New(fmt.Sprint("error while prepare update message response: ", er.Error()))
 	}
-	return
-}
 
-func (d *DatatransRepoMysqlImpl) DuplicatingTxApx(copy entities.TransApx) (er error) {
-
-	stmt, er := d.db2.Prepare(`INSERT INTO tabtrans(
-		tabtrans_id,
-		tgl_trans,
-		no_rekening,
-		kode_trans,
-		my_kode_trans,
-		pokok,
-		kuitansi,
-		userid,
-		keterangan,
-		verifikasi,
-		tob,
-		sandi_trans,
-		posted_to_gl,
-		kode_kantor,
-		jam,
-		tgl_real_trans,
-		pay_lkm_source,
-		pay_lkm_norek,
-		pay_idpel,
-		pay_biller_code,
-		pay_product_code
-	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-	if er != nil {
-		return errors.New(fmt.Sprint("error while prepare add tabtrans transaction: ", er.Error()))
-	}
 	defer func() {
 		_ = stmt.Close()
 	}()
 
-	if _, er := stmt.Exec(
-		copy.Tabtrans_id,
-		copy.Tgl_trans,
-		copy.No_rekening,
-		copy.Kode_trans,
-		copy.My_kode_trans,
-		copy.Pokok,
-		copy.Kuitansi,
-		copy.Userid,
-		copy.Keterangan,
-		copy.Verifikasi,
-		copy.Tob,
-		copy.Sandi_trans,
-		copy.Posted_to_gl,
-		copy.Kode_kantor,
-		copy.Jam,
-		copy.Tgl_real_trans,
-		copy.Pay_lkm_source,
-		copy.Pay_lkm_norek,
-		copy.Pay_idpel,
-		copy.Pay_biller_code,
-		copy.Pay_product_code); er != nil {
-		return errors.New(fmt.Sprint("error while add tabtrans transaction: ", er.Error()))
-	} else {
-		return nil
-	}
-}
-
-func (d *DatatransRepoMysqlImpl) DeleteTxApx(kuitansi string) (er error) {
-
-	stmt, er := d.db2.Prepare("DELETE FROM tabtrans WHERE kuitansi = ?")
-	if er != nil {
-		return errors.New(fmt.Sprint("error while prepare delete tabtrans transaction: ", er.Error()))
-	}
-	defer func() {
-		_ = stmt.Close()
-	}()
-
-	if _, er := stmt.Exec(kuitansi); er != nil {
-		return errors.New(fmt.Sprint("error while delete tabtrans transaction: ", er.Error()))
-	}
-
-	return nil
-}
-
-func (d *DatatransRepoMysqlImpl) RecycleTxApx(kuitansi string) (er error) {
-	dataRepo, _ := NewDatatransRepo()
-
-	// Get Trans ID
-	transId, err := dataRepo.GetTransIdApx()
-	if er != nil {
-		return err
-	}
-
-	// Get DATA
-	var data entities.TransApx
-	data, er = dataRepo.GetTxInfoApx(kuitansi)
-	if er != nil {
-		return er
-	}
-
-	// CREATE DATA
-	newTrx := data
-	newTrx.Tabtrans_id = transId
-	newTrx.Kuitansi = "S50RT4953021020"
-	newTrx.Userid = 1779
-	err = dataRepo.DuplicatingTxApx(newTrx)
-	if err != nil {
-		return er
-	}
-
-	// DELETE DATA
-	err = dataRepo.DeleteTxApx(kuitansi)
-	if err != nil {
-		return er
+	if _, er = stmt.Exec(isoMsg, stan); er != nil {
+		return errors.New(fmt.Sprint("error while update message response: ", er.Error()))
 	}
 
 	return nil

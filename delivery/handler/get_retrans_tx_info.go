@@ -5,6 +5,7 @@ import (
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/entities/err"
 	"gwlkm-resend-transaction/entities/statuscode"
+	"gwlkm-resend-transaction/entities/web"
 	"gwlkm-resend-transaction/usecase"
 	"net/http"
 
@@ -14,7 +15,7 @@ import (
 func GetRetransInfo(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
-	payload := entities.TransHistoryRequest{}
+	payload := web.StanFilter{}
 	httpio.Bind(&payload)
 
 	usecase := usecase.NewRetransactionUsecase()

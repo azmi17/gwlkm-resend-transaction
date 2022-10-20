@@ -3,6 +3,7 @@ package handler
 import (
 	"gwlkm-resend-transaction/delivery/handler/httpio"
 	"gwlkm-resend-transaction/entities"
+	"gwlkm-resend-transaction/entities/web"
 	"gwlkm-resend-transaction/usecase"
 	"net/http"
 
@@ -12,13 +13,13 @@ import (
 func ResendTransByStan(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
-	payload := entities.TransHistoryRequest{}
+	payload := web.StanFilter{}
 	httpio.Bind(&payload)
 
 	usecase := usecase.NewRetransactionUsecase()
 	er := usecase.ResendTransaction(payload.Stan)
 
-	resp := entities.TransHistoryUnreversedResponse{}
+	resp := web.RetransResponse{}
 	if er != nil {
 		entities.PrintError(er.Error())
 		resp.ResponseCode = "1111"

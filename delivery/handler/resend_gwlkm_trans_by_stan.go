@@ -10,24 +10,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ChangeResponseCode(ctx *gin.Context) {
+func ResendReversedTransByStan(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
-	payload := web.ChangeResponseCode{}
+	payload := web.StanFilter{}
 	httpio.Bind(&payload)
 
 	usecase := usecase.NewRetransactionUsecase()
-	er := usecase.ChangeResponseCode(payload)
+	newStan, er := usecase.ResendGwlkmTransaction(payload.Stan)
 
-	resp := web.RetransResponse{}
+	resp := web.RetransWithNewStanResponse{}
 	if er != nil {
 		entities.PrintError(er.Error())
 		resp.ResponseCode = "1111"
 		resp.ResponseMessage = er.Error()
+		resp.NewStan = newStan
 	} else {
 		resp.ResponseCode = "0000"
-		resp.ResponseMessage = "Change RC succeeded"
+		resp.ResponseMessage = "Resend gwlkm transaction succeeded"
+		resp.NewStan = newStan
 	}
 	httpio.Response(http.StatusOK, resp)
-
 }

@@ -3,31 +3,31 @@ package handler
 import (
 	"gwlkm-resend-transaction/delivery/handler/httpio"
 	"gwlkm-resend-transaction/entities"
+	"gwlkm-resend-transaction/entities/web"
 	"gwlkm-resend-transaction/usecase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ResendReversedTransByStan(ctx *gin.Context) {
+func UpdateIsoMsg(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
-	payload := entities.TransHistoryRequest{}
+	payload := web.UpdateIsoMsg{}
 	httpio.Bind(&payload)
 
 	usecase := usecase.NewRetransactionUsecase()
-	newStan, er := usecase.ResendReversedTransaction(payload.Stan)
+	er := usecase.UpdateIsoMsg(payload)
 
-	resp := entities.TransHistoryReversedResponse{}
+	resp := web.RetransResponse{}
 	if er != nil {
 		entities.PrintError(er.Error())
 		resp.ResponseCode = "1111"
 		resp.ResponseMessage = er.Error()
-		resp.NewStan = newStan
 	} else {
 		resp.ResponseCode = "0000"
-		resp.ResponseMessage = "Resend transaction succeeded"
-		resp.NewStan = newStan
+		resp.ResponseMessage = "Update iso message succeeded"
 	}
 	httpio.Response(http.StatusOK, resp)
+
 }

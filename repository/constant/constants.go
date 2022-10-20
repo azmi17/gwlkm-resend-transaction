@@ -11,9 +11,10 @@ var (
 	SQLno_hp_alternatif            myutils.FieldString
 )
 
+// Status Code Tx
 var (
 	Success = "0000"
 	Suspect = "1235"
 	Pending = "1234"
-	Failed  = "1100"
+	Resend  = "1700"
 )

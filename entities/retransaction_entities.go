@@ -47,7 +47,7 @@ type TransHistory struct {
 	Fee_Rek_Induk               int
 }
 
-type MsgTransHistory struct {
+type IsoMessageBody struct {
 	MTI              string // MTI
 	ProcessingCode   string // bit 003
 	Amount           int    // bit 004
@@ -76,45 +76,16 @@ type MsgTransHistory struct {
 	Ref      string
 }
 
-type CoreAddr struct {
+type CoreAddrInfo struct {
 	BankCode string
 	IPaddr   string
 	TCPPort  int
 }
 
-type StanReference struct {
+type StanReferences struct {
 	Trans_id int
 	Ref_Stan string
 	Stan     string
-}
-
-type TransHistoryRequest struct {
-	Stan string `form:"stan"`
-}
-
-type TransHistoryUnreversedResponse struct {
-	ResponseCode    string `json:"response_code"`
-	ResponseMessage string `json:"response_message"`
-}
-
-type TransHistoryReversedResponse struct {
-	ResponseCode    string `json:"response_code"`
-	ResponseMessage string `json:"response_message"`
-	NewStan         string `json:"new_stan"`
-}
-
-type RetransTxInfo struct {
-	Trans_Id      int    `json:"trans_id"`
-	Idpel         string `json:"idpel"`
-	Stan          string `json:"stan"`
-	Ref_Stan      string `json:"ref_stan"`
-	Tgl_Trans_Str string `json:"tgl_trans"`
-	Response_Code string `json:"response_code"`
-	BankCode      string `json:"kode_lkm"`
-	RekID         string `json:"rek_id"`
-	Amount        string `json:"amount"`
-	Kuitansi      string `json:"kuitansi"`
-	Iso_Msg       string `json:"iso_message"`
 }
 
 type TransApx struct {
@@ -139,9 +110,4 @@ type TransApx struct {
 	Pay_idpel        string
 	Pay_biller_code  string
 	Pay_product_code string
-}
-
-type ChangeResponseCode struct {
-	Stan string `form:"stan"`
-	RC   string `form:"response_code"`
 }

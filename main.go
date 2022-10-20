@@ -3,6 +3,7 @@ package main
 import (
 	"gwlkm-resend-transaction/delivery"
 	"gwlkm-resend-transaction/delivery/router"
+	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/repository/databasefactory"
 	"math/rand"
 	"os"
@@ -35,11 +36,19 @@ func init() {
 func LoadConfiguration(isReload bool) {
 	var er error
 	if isReload {
-		_ = glg.Log("e-Channel Recycle Transaction Service")
+		_ = glg.Log("===============================================")
+		_ = glg.Log("Application Name:", helper.AppName)
+		_ = glg.Log("Application Version:", helper.AppVersion)
+		_ = glg.Log("Last Build:", helper.LastBuild)
+		_ = glg.Log("===============================================")
 		_ = glg.Log("Reloading configuration file...")
 		er = godotenv.Overload(".env")
 	} else {
-		_ = glg.Log("e-Channel Recycle Transaction Service")
+		_ = glg.Log("===============================================")
+		_ = glg.Log("Application Name:", helper.AppName)
+		_ = glg.Log("Application Version:", helper.AppVersion)
+		_ = glg.Log("Last Build:", helper.LastBuild)
+		_ = glg.Log("===============================================")
 		_ = glg.Log("Loading configuration file...")
 		er = godotenv.Load(".env")
 	}
@@ -74,38 +83,38 @@ func LoadConfiguration(isReload bool) {
 func PrepareDatabase() {
 	var er error
 
-	// # DB 1
-	databasefactory.AppDb1, er = databasefactory.GetDatabase()
-	databasefactory.AppDb1.SetEnvironmentVariablePrefix("ech.")
+	// # App DB: Echannel V3
+	databasefactory.Echannel, er = databasefactory.GetDatabase()
+	databasefactory.Echannel.SetEnvironmentVariablePrefix("ech.")
 	if er != nil {
 		glg.Fatal(er.Error())
 	}
 
-	_ = glg.Log("Connecting to echannelv3...")
-	if er = databasefactory.AppDb1.Connect(); er != nil {
+	_ = glg.Log("Connecting to echannel v3...")
+	if er = databasefactory.Echannel.Connect(); er != nil {
 		_ = glg.Error("Connection to echannelv3 failed : ", er.Error())
 		os.Exit(1)
 	}
 
-	if er = databasefactory.AppDb1.Ping(); er != nil {
-		_ = glg.Error("Cannot ping echannelv3 : ", er.Error())
+	if er = databasefactory.Echannel.Ping(); er != nil {
+		_ = glg.Error("Cannot ping echannel v3 : ", er.Error())
 		os.Exit(1)
 	}
 
-	// # DB 2
-	databasefactory.AppDb2, er = databasefactory.GetDatabase()
-	databasefactory.AppDb2.SetEnvironmentVariablePrefix("apx.")
+	// # App DB: Apex
+	databasefactory.Apex, er = databasefactory.GetDatabase()
+	databasefactory.Apex.SetEnvironmentVariablePrefix("apx.")
 	if er != nil {
 		glg.Fatal(er.Error())
 	}
 
 	_ = glg.Log("Connecting to apex..")
-	if er = databasefactory.AppDb2.Connect(); er != nil {
+	if er = databasefactory.Apex.Connect(); er != nil {
 		_ = glg.Error("Connection to apex failed: ", er.Error())
 		os.Exit(1)
 	}
 
-	if er = databasefactory.AppDb2.Ping(); er != nil {
+	if er = databasefactory.Apex.Ping(); er != nil {
 		_ = glg.Error("Cannot ping apex: ", er.Error())
 		os.Exit(1)
 	}

@@ -1,4 +1,4 @@
-package datatransrepo
+package echanneltransrepo
 
 import (
 	"database/sql"
@@ -7,11 +7,9 @@ import (
 	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/repository/constant"
 	"log"
-	"reflect"
 	"testing"
 	"time"
 
-	"github.com/kpango/glg"
 	"github.com/randyardiansyah25/libpkg/net/tcp"
 
 	iso8583uParser "github.com/randyardiansyah25/iso8583u/parser"
@@ -33,30 +31,16 @@ func GetConnection() *sql.DB {
 	return db
 }
 
-func GetConnectionApx() *sql.DB {
-	dataSource := "root:azmic0ps@tcp(localhost:3317)/integrasi_apex_ems?parseTime=true"
-	db, err := sql.Open("mysql", dataSource)
-	if err != nil {
-		panic(err)
-	}
-
-	db.SetMaxIdleConns(10)
-	db.SetMaxOpenConns(100)
-	db.SetConnMaxIdleTime(5 * time.Minute)
-	db.SetConnMaxLifetime(60 * time.Minute)
-
-	return db
-}
 func TestGetData(t *testing.T) {
 
 	// CALL BANK DATA REPO
 	db := GetConnection()
-	dataTransRepo := newDatatransRepoMysqlImpl(db, nil)
-	data, err := dataTransRepo.GetData("100041274590")
+	echanneltransrepo := newEchannelTransRepoMysqlImpl(db)
+	data, err := echanneltransrepo.GetData("100041274590")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	coreAddr, _ := dataTransRepo.GetServeAddr(data.BankCode)
+	coreAddr, _ := echanneltransrepo.GetServeAddr(data.BankCode)
 
 	// CALL RE-TRANSACTION REPO
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 30)
@@ -92,8 +76,8 @@ func TestMarshalISO(t *testing.T) {
 
 	// CALL BANK DATA REPO
 	db := GetConnection()
-	dataTransRepo := newDatatransRepoMysqlImpl(db, nil)
-	data, err := dataTransRepo.GetData("100041274590")
+	echanneltransrepo := newEchannelTransRepoMysqlImpl(db)
+	data, err := echanneltransrepo.GetData("100041274590")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -119,10 +103,10 @@ func TestReversedData(t *testing.T) {
 
 	// CALL BANK DATA REPO
 	db := GetConnection()
-	dataTransRepo := newDatatransRepoMysqlImpl(db, nil)
+	echanneltransrepo := newEchannelTransRepoMysqlImpl(db)
 
 	// CALL REVERSED DATA
-	reversedData, err := dataTransRepo.GetReversedData("100041274590")
+	reversedData, err := echanneltransrepo.GetOriginData("100041274590")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -175,21 +159,21 @@ func TestReversedData(t *testing.T) {
 	newTrx.Fee_Rek_Induk = reversedData.Fee_Rek_Induk
 
 	// CALL DUPLICATE DATA
-	err = dataTransRepo.DuplicatingData(newTrx)
+	err = echanneltransrepo.DuplicatingData(newTrx)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeResponseCode(constant.Failed, reversedData.Stan, reversedData.Trans_id)
+	err = echanneltransrepo.ChangeResponseCode(constant.Resend, reversedData.Stan, reversedData.Trans_id)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	// fmt.Println("Update reversed transaction succeeded")
 
 	// CALL CORE-ADDRS
-	coreAddr, _ := dataTransRepo.GetServeAddr(newTrx.Bank_Code)
+	coreAddr, _ := echanneltransrepo.GetServeAddr(newTrx.Bank_Code)
 
 	// CALL TCP AND SEND ISO MSG
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 30)
@@ -219,10 +203,10 @@ func TestReversedDataTwo(t *testing.T) {
 
 	// CALL BANK DATA REPO
 	db := GetConnection()
-	dataTransRepo := newDatatransRepoMysqlImpl(db, nil)
+	echanneltransrepo := newEchannelTransRepoMysqlImpl(db)
 
 	// CALL REVERSED DATA
-	reversedData, err := dataTransRepo.GetReversedData("100041274590")
+	reversedData, err := echanneltransrepo.GetOriginData("100041274590")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -275,14 +259,14 @@ func TestReversedDataTwo(t *testing.T) {
 	newTrx.Fee_Rek_Induk = reversedData.Fee_Rek_Induk
 
 	// CALL DUPLICATE DATA
-	err = dataTransRepo.DuplicatingData(newTrx)
+	err = echanneltransrepo.DuplicatingData(newTrx)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	// fmt.Println("insert new transaction succeeded")
 
 	// CALL CHANGE RESPONSE CODE
-	err = dataTransRepo.ChangeResponseCode(constant.Failed, reversedData.Stan, reversedData.Trans_id)
+	err = echanneltransrepo.ChangeResponseCode(constant.Resend, reversedData.Stan, reversedData.Trans_id)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -335,7 +319,7 @@ func TestReversedDataTwo(t *testing.T) {
 	// t.Log("Result : ", isoMsg)
 
 	// CALL CORE-ADDRS
-	coreAddr, _ := dataTransRepo.GetServeAddr(newTrx.Bank_Code)
+	coreAddr, _ := echanneltransrepo.GetServeAddr(newTrx.Bank_Code)
 
 	// CALL TCP AND SEND ISO MSG
 	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 30)
@@ -399,89 +383,10 @@ func TestAesCrypto_Decrypt(t *testing.T) {
 
 func TestGetReversedData(t *testing.T) {
 	db := GetConnection()
-	dataTransRepo := newDatatransRepoMysqlImpl(db, nil)
-	data, err := dataTransRepo.GetReversedData("100041274590")
+	echanneltransrepo := newEchannelTransRepoMysqlImpl(db)
+	data, err := echanneltransrepo.GetOriginData("100041274590")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	fmt.Println("Ref STAN:", len(data.Ref_Stan))
-}
-
-func GetNextIdTabtrans() int {
-	db := GetConnectionApx()
-	userId := "1779"
-	var transId int
-
-	row := db.QueryRow("SELECT "+"ibs_get_next_id_with_userid(?) AS trans_id", userId)
-	err := row.Scan(&transId)
-	if err != nil {
-		_ = glg.Log(err.Error())
-	}
-
-	return transId
-}
-
-func TestGetTabtransTx(t *testing.T) {
-	db := GetConnectionApx()
-	dataTransRepo := newDatatransRepoMysqlImpl(nil, db)
-	data, err := dataTransRepo.GetTxInfoApx("TKREDB830378018335")
-	if err != nil {
-		_ = glg.Log(err.Error())
-	}
-
-	v := reflect.ValueOf(data)
-	typeOfData := v.Type()
-	for i := 0; i < v.NumField(); i++ {
-		// fmt.Printf("Field: %s\t\t Value: %v\n", typeOfData.Field(i).Name, v.Field(i).Interface())
-		fmt.Printf("%s => %v\n", typeOfData.Field(i).Name, v.Field(i).Interface())
-	}
-
-}
-
-func TestCreateTabtransTx(t *testing.T) {
-	db := GetConnectionApx()
-	dataTransRepo := newDatatransRepoMysqlImpl(nil, db)
-
-	// GET DATA
-	var data entities.TransApx
-	data, err := dataTransRepo.GetTxInfoApx("TKREDB830378018335")
-	if err != nil {
-		_ = glg.Log(err.Error())
-	}
-
-	transId, err := dataTransRepo.GetTransIdApx()
-	if err != nil {
-		_ = glg.Log(err.Error())
-	}
-
-	// CREATE DATA
-	newTrx := data
-	newTrx.Tabtrans_id = transId
-	newTrx.Kuitansi = "S50RT4953021020"
-	newTrx.Userid = 1779
-	err = dataTransRepo.DuplicatingTxApx(newTrx)
-	if err != nil {
-		_ = glg.Log(err.Error())
-	}
-	fmt.Println("Duplicating transaction succeeded..")
-
-	// DELETE DATA
-	err = dataTransRepo.DeleteTxApx("TKREDB830378018335")
-	if err != nil {
-		_ = glg.Log(err.Error())
-	}
-	fmt.Println("Delete transaction succeeded..")
-
-}
-
-func TestRecycleTxApx(t *testing.T) {
-	db := GetConnectionApx()
-	dataTransRepo := newDatatransRepoMysqlImpl(nil, db)
-
-	err := dataTransRepo.RecycleTxApx("TKREDB830378018335")
-	if err != nil {
-		_ = glg.Log(err.Error())
-	}
-
-	fmt.Println("Recycle tx succeeded..")
 }
