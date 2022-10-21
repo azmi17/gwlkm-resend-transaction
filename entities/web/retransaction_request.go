@@ -4,6 +4,10 @@ type StanFilter struct {
 	Stan string `form:"stan"`
 }
 
+type KuitansiFilter struct {
+	Kuitansi string `form:"kuitansi"`
+}
+
 type ChangeResponseCode struct {
 	Stan string `form:"stan"`
 	RC   string `form:"response_code"`

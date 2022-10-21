@@ -47,14 +47,12 @@ func (r *retransactionUsecase) ResendTransaction(stan string) (er error) {
 }
 
 func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan string, er error) {
-
-	// REPEAT TRANS COND
-	isRepeat := false
-
-	// INIT REPOSITORY BANK DATA
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
 
-	// SEARCH REVERSED DATA BY STAN
+	// IS REPEAT CONDITION
+	isRepeat := false
+
+	// Search Origin Data By STAN
 	var originData entities.TransHistory
 	if originData, er = dataRepo.GetOriginData(stan); er != nil {
 		return newStan, er
@@ -65,7 +63,7 @@ func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan stri
 		return newStan, err.RCMustBeSuccess
 	}
 
-	// Check if data repeated => isRepeat will be TRUE
+	// Check if data repeated => isRepeat will be true
 	if originData.Ref_Stan != "" && (originData.Response_Code == constant.Suspect || originData.Response_Code == constant.Success) {
 		isRepeat = true
 	}
@@ -83,7 +81,7 @@ func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan stri
 		newTrx.Ref = originData.Product_Code + newTrx.Stan
 		newTrx.Response_Code = constant.Suspect
 
-		// DO: DUPLICATE DATA
+		// DO: Duplicate Data
 		er = dataRepo.DuplicatingData(newTrx)
 		if er != nil {
 			return newStan, er
@@ -100,7 +98,7 @@ func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan stri
 		Msg:            newTrx.Msg,
 	}
 
-	// RECYCLE REVERSED TRANSACTION
+	// DO: Recycle Transaction
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleGwlkmTransaction(&isoMsg)
 	if isoMsg.ResponseCode == constant.Success {

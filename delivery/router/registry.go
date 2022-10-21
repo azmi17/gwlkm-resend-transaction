@@ -27,10 +27,10 @@ func RegisterHandler(router *gin.Engine) {
 
 	// API Endpoint:
 	apiv1.GET("/version", handler.AppInfo)
-	// apiv1.POST("/unreversed", handler.ResendTransByStan)
 	apiv1.POST("/resend", handler.ResendReversedTransByStan)
 	apiv1.POST("/history", handler.GetRetransInfo)
 	apiv1.PUT("/change-rc", handler.ChangeResponseCode)
 	apiv1.PUT("/isomsg", handler.UpdateIsoMsg)
+	apiv1.POST("/tabtrans", handler.GetTabtransInfo)
 
 }

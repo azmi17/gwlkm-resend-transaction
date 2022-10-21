@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/entities/err"
+	"gwlkm-resend-transaction/entities/web"
 	"gwlkm-resend-transaction/helper"
 )
 
@@ -239,4 +240,52 @@ func (a *ApexTransRepoMysqlImpl) DeleteTxApx(kuitansi string) (er error) {
 	}
 
 	return nil
+}
+
+func (a *ApexTransRepoMysqlImpl) GetTabtransApx(kuitansi string) (listTx []web.TabtransInfoApx, er error) {
+	rows, er := a.apexDb.Query(`SELECT
+		DATE_FORMAT(tgl_trans, "%d/%m/%Y") AS tgl_trans,
+		no_rekening,
+		kode_trans,
+		pay_idpel,
+		kuitansi,
+		pokok,
+		keterangan,
+		pay_product_code,
+		pay_biller_code,
+		userid
+	FROM tabtrans WHERE kuitansi = ?`, kuitansi)
+	if er != nil {
+		return listTx, er
+	}
+
+	defer func() {
+		_ = rows.Close()
+	}()
+
+	for rows.Next() {
+		var tabtransTxInfo web.TabtransInfoApx
+		if er = rows.Scan(
+			&tabtransTxInfo.Tgl_Trans,
+			&tabtransTxInfo.Kode_LKM,
+			&tabtransTxInfo.Kode_Trans,
+			&tabtransTxInfo.Idpel,
+			&tabtransTxInfo.Kuitansi,
+			&tabtransTxInfo.Pokok,
+			&tabtransTxInfo.Keterangan,
+			&tabtransTxInfo.Product_Code,
+			&tabtransTxInfo.Biller_Code,
+			&tabtransTxInfo.User_Id,
+		); er != nil {
+			return listTx, er
+		}
+
+		listTx = append(listTx, tabtransTxInfo)
+	}
+
+	if len(listTx) == 0 {
+		return listTx, err.NoRecord
+	} else {
+		return
+	}
 }

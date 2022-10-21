@@ -17,5 +17,5 @@ func GetCurrentDate() string {
 
 // Custom Date
 var (
-	GETMMDD = GetCurrentDate()
+	GETMMDD = GetCurrentDate() // output: 1021 etc..
 )

@@ -24,3 +24,16 @@ type RetransTxInfo struct {
 	Kuitansi      string `json:"kuitansi"`
 	Iso_Msg_Resp  string `json:"iso_message_response"`
 }
+
+type TabtransInfoApx struct {
+	Tgl_Trans    string  `json:"tgl_trans"`
+	Kode_LKM     string  `json:"kode_lkm"`
+	Kode_Trans   string  `json:"kode_trans"`
+	Idpel        string  `json:"subscriber_id"`
+	Kuitansi     string  `json:"kuitansi"`
+	Pokok        float64 `json:"pokok"`
+	Keterangan   string  `json:"keterangan"`
+	Product_Code string  `json:"product_code"`
+	Biller_Code  string  `json:"biller_code"`
+	User_Id      int     `json:"user_id"`
+}
