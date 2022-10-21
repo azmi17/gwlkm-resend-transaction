@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/helper"
+	"gwlkm-resend-transaction/repository/apextransrepo"
+	"gwlkm-resend-transaction/repository/constant"
 	"gwlkm-resend-transaction/repository/echanneltransrepo"
 
 	iso8583uParser "github.com/randyardiansyah25/iso8583u/parser"
@@ -35,7 +37,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessag
 		return
 	}
 	isoUnMarshal.SetMti(dataTrans.MTI)
-	isoUnMarshal.SetField(3, dataTrans.ProcessingCode)
+	isoUnMarshal.SetField(3, "200700")
 	isoUnMarshal.SetField(4, isoUnMarshal.GetField(4))
 	isoUnMarshal.SetField(5, isoUnMarshal.GetField(5))
 	isoUnMarshal.SetField(6, isoUnMarshal.GetField(6))
@@ -56,7 +58,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessag
 	isoUnMarshal.SetField(61, isoUnMarshal.GetField(61))
 	isoUnMarshal.SetField(100, isoUnMarshal.GetField(100))
 	isoUnMarshal.SetField(103, isoUnMarshal.GetField(103))
-	isoUnMarshal.SetField(104, isoUnMarshal.GetField(104))
+	isoUnMarshal.SetField(104, "TINTCR")
 
 	// MARSHAL PROCS
 	isoMsg, err := isoUnMarshal.GoMarshal()
@@ -92,7 +94,6 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessag
 		dataTrans.Msg = fmt.Sprint("re-transaction failed: ", st.Message)
 		return errors.New(dataTrans.Msg)
 	}
-
 	return nil
 }
 
@@ -177,6 +178,96 @@ func (r *retransactionRepoImpl) RecycleGwlkmTransaction(dataTrans *entities.IsoM
 	} else {
 		dataTrans.Msg = fmt.Sprint("re-transaction failed: ", st.Message)
 		return errors.New(dataTrans.Msg)
+	}
+
+	return nil
+}
+
+func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans *entities.IsoMessageBody) (err error) {
+
+	//TODO: Send ISO data to IP & Port GWLKM
+
+	// ISO OBJ INIT
+	iso, err := iso8583uParser.NewISO8583U()
+	if err != nil {
+		entities.PrintError("load package error", err.Error())
+		return
+	}
+
+	// UNMARSHAL | RE-COMPOSE ISO
+	err = iso.GoUnMarshal(dataTrans.Msg)
+	if err != nil {
+		entities.PrintError(err.Error())
+		return
+	}
+	iso.SetMti(dataTrans.MTI)
+	iso.SetField(3, "400700")
+	iso.SetField(104, "TINTCR")
+
+	// MARSHAL PROCS
+	isoMsg, err := iso.GoMarshal()
+	if err != nil {
+		entities.PrintError(err.Error())
+		return
+	}
+
+	// CORE ADDRS
+	repo, _ := echanneltransrepo.NewEchannelTransRepo()
+	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
+	if err != nil {
+		entities.PrintError(err.Error())
+	}
+
+	// INIT TCP OBJ
+	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
+	entities.PrintLog("SEND:\n", iso.PrettyPrint())
+	st := client.Send(tcp.SetHeader(isoMsg, 4))
+
+	// UNMARSHAL PROCS FROM SENDER
+	if st.Code == tcp.CONNOK {
+		err = iso.GoUnMarshal(st.Message)
+		if err != nil {
+			entities.PrintError(err.Error())
+			return
+		}
+		// Override below:
+		dataTrans.ResponseCode = iso.GetField(39)
+		dataTrans.Msg = iso.GetField(48)
+		entities.PrintLog("RECV:\n", iso.PrettyPrint())
+	} else {
+		dataTrans.Msg = fmt.Sprint("re-transaction failed: ", st.Message)
+		return errors.New(dataTrans.Msg)
+	}
+
+	// TODO: Begin Recycle apex transaction..
+	if dataTrans.ResponseCode == constant.Success {
+
+		apexRepo, _ := apextransrepo.NewApexTransRepo()
+
+		// Get Apx tx..
+		var data entities.TransApx
+		data, er := apexRepo.GetLKMTCreditTransferApx("TINTCR" + iso.GetField(11))
+		if er != nil {
+			return er
+		}
+
+		// Create Apx tx..
+		newTrx := data
+		newTrx.Kode_trans = "290"
+		newTrx.My_kode_trans = "200"
+		newTrx.Keterangan = "Reversal " + data.Keterangan
+		er = apexRepo.DuplicatingTxApx(newTrx)
+		if er != nil {
+			return er
+		}
+
+		echannelRepo, _ := echanneltransrepo.NewEchannelTransRepo()
+
+		// Change RC
+		er = echannelRepo.ChangeResponseCode(constant.Resend, iso.GetField(11), 0)
+		if er != nil {
+			return er
+		}
 	}
 
 	return nil

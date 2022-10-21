@@ -33,4 +33,6 @@ func RegisterHandler(router *gin.Engine) {
 	apiv1.PUT("/isomsg", handler.UpdateIsoMsg)
 	apiv1.POST("/tabtrans", handler.GetTabtransInfo)
 
+	apiv1.POST("/resent", handler.ResendTransByStan)
+	apiv1.POST("/transfer-sesama/creditrev", handler.ResendLkmTransferSMprematureRevOnCre)
 }

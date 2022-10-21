@@ -289,3 +289,60 @@ func (a *ApexTransRepoMysqlImpl) GetTabtransApx(kuitansi string) (listTx []web.T
 		return
 	}
 }
+
+func (a *ApexTransRepoMysqlImpl) GetLKMTCreditTransferApx(kuitansi string) (transApx entities.TransApx, er error) {
+	row := a.apexDb.QueryRow(`SELECT 
+		tabtrans_id,
+		tgl_trans,
+		no_rekening,
+		kode_trans,
+		my_kode_trans,
+		pokok,
+		kuitansi,
+		userid,
+		keterangan,
+		verifikasi,
+		tob,
+		sandi_trans,
+		posted_to_gl,
+		kode_kantor,
+		jam,
+		tgl_real_trans,
+		pay_lkm_source,
+		pay_lkm_norek,
+		pay_idpel,
+		pay_biller_code,
+		pay_product_code
+	FROM tabtrans WHERE kuitansi= ? AND my_kode_trans='100' LIMIT 1`, kuitansi)
+	er = row.Scan(
+		&transApx.Tabtrans_id,
+		&transApx.Tgl_trans,
+		&transApx.No_rekening,
+		&transApx.Kode_trans,
+		&transApx.My_kode_trans,
+		&transApx.Pokok,
+		&transApx.Kuitansi,
+		&transApx.Userid,
+		&transApx.Keterangan,
+		&transApx.Verifikasi,
+		&transApx.Tob,
+		&transApx.Sandi_trans,
+		&transApx.Posted_to_gl,
+		&transApx.Kode_kantor,
+		&transApx.Jam,
+		&transApx.Tgl_real_trans,
+		&transApx.Pay_lkm_source,
+		&transApx.Pay_lkm_norek,
+		&transApx.Pay_idpel,
+		&transApx.Pay_biller_code,
+		&transApx.Pay_product_code,
+	)
+	if er != nil {
+		if er == sql.ErrNoRows {
+			return transApx, err.NoRecord
+		} else {
+			return transApx, errors.New(fmt.Sprint("error while get lkm credit transfer data: ", er.Error()))
+		}
+	}
+	return
+}

@@ -17,6 +17,7 @@ type RetransactionUsecase interface {
 	GetRetransTxInfo(stan string) (web.RetransTxInfo, error)
 	ChangeResponseCode(web.ChangeResponseCode) error
 	UpdateIsoMsg(web.UpdateIsoMsg) error
+	ResendLkmTransferSMprematureRevOnCre(string) (er error)
 }
 
 type retransactionUsecase struct{}
@@ -146,4 +147,21 @@ func (r *retransactionUsecase) UpdateIsoMsg(payload web.UpdateIsoMsg) (er error)
 		return er
 	}
 	return nil
+}
+
+func (r *retransactionUsecase) ResendLkmTransferSMprematureRevOnCre(stan string) (er error) {
+
+	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
+	var data entities.IsoMessageBody
+	if data, er = dataRepo.GetData(stan); er != nil {
+		return er
+	}
+
+	reTransRepo := retransactionepo.NewRetransactionRepo()
+	reTransRepo.RecycleLkmTransferSMprematureRevOnCre(&data)
+	if data.ResponseCode != constant.Success {
+		return errors.New(data.Msg) // 44-Transaksi Sudah di reversal
+	} else {
+		return nil
+	}
 }

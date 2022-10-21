@@ -12,4 +12,5 @@ type ApexTransRepo interface {
 	DuplicatingUnitTestTxApx(copy ...entities.TransApx) error
 	DeleteTxApx(kuitansi string) error
 	GetTabtransApx(kuitansi string) ([]web.TabtransInfoApx, error)
+	GetLKMTCreditTransferApx(kuitansi string) (entities.TransApx, error)
 }
