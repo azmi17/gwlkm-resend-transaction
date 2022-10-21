@@ -8,4 +8,5 @@ var (
 	DuplicateEntry       = errors.New("duplicate entry")
 	LoadPkg              = errors.New("load package error")
 	RCMustBeSuccess      = errors.New("RC must be 0000")
+	FieldMustBeExist     = errors.New("Field cannot be empty")
 )

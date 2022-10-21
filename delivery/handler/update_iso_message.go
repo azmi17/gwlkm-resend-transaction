@@ -12,13 +12,20 @@ import (
 
 func UpdateIsoMsg(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
-
 	payload := web.UpdateIsoMsg{}
 	httpio.Bind(&payload)
+	// err := httpio.BindWithErr(payload)
+	// err := ctx.ShouldBind(&payload)
+	// if err != nil {
+	// 	errors := helper.FormatValidationError(err)
+	// 	errorMesage := gin.H{"errors": errors}
 
+	// 	response := helper.ApiResponse("Failed to update", http.StatusUnprocessableEntity, "failed", errorMesage)
+	// 	ctx.JSON(http.StatusUnprocessableEntity, response)
+	// 	return
+	// }
 	usecase := usecase.NewRetransactionUsecase()
 	er := usecase.UpdateIsoMsg(payload)
-
 	resp := web.RetransResponse{}
 	if er != nil {
 		entities.PrintError(er.Error())

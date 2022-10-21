@@ -36,19 +36,19 @@ func init() {
 func LoadConfiguration(isReload bool) {
 	var er error
 	if isReload {
-		_ = glg.Log("===============================================")
+		_ = glg.Log("=================Service Info===================")
 		_ = glg.Log("Application Name:", helper.AppName)
 		_ = glg.Log("Application Version:", helper.AppVersion)
 		_ = glg.Log("Last Build:", helper.LastBuild)
-		_ = glg.Log("===============================================")
+		_ = glg.Log("================================================")
 		_ = glg.Log("Reloading configuration file...")
 		er = godotenv.Overload(".env")
 	} else {
-		_ = glg.Log("===============================================")
+		_ = glg.Log("=================Service Info===================")
 		_ = glg.Log("Application Name:", helper.AppName)
 		_ = glg.Log("Application Version:", helper.AppVersion)
 		_ = glg.Log("Last Build:", helper.LastBuild)
-		_ = glg.Log("===============================================")
+		_ = glg.Log("================================================")
 		_ = glg.Log("Loading configuration file...")
 		er = godotenv.Load(".env")
 	}

@@ -121,6 +121,11 @@ func (r *retransactionUsecase) GetRetransTxInfo(stan string) (txInfo web.Retrans
 }
 
 func (r *retransactionUsecase) ChangeResponseCode(payload web.ChangeResponseCode) (er error) {
+
+	if (payload.Stan == "") || (payload.RC == "") {
+		return err.FieldMustBeExist
+	}
+
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
 	er = dataRepo.ChangeResponseCode(payload.RC, payload.Stan, 0)
 	if er != nil {
@@ -130,6 +135,11 @@ func (r *retransactionUsecase) ChangeResponseCode(payload web.ChangeResponseCode
 }
 
 func (r *retransactionUsecase) UpdateIsoMsg(payload web.UpdateIsoMsg) (er error) {
+
+	if (payload.Iso_Msg == "") || (payload.Stan == "") {
+		return err.FieldMustBeExist
+	}
+
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
 	er = dataRepo.UpdateIsoMsg(payload.Iso_Msg, payload.Stan)
 	if er != nil {

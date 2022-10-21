@@ -16,4 +16,6 @@ type ChangeResponseCode struct {
 type UpdateIsoMsg struct {
 	Stan    string `form:"stan"`
 	Iso_Msg string `form:"iso_message"`
+	// Stan    string `form:"stan" binding:"required"`
+	// Iso_Msg string `form:"iso_message" binding:"required"`
 }
