@@ -104,7 +104,6 @@ type TransApx struct {
 	Posted_to_gl     string
 	Kode_kantor      string
 	Jam              string
-	Tgl_real_trans   time.Time
 	Pay_lkm_source   string
 	Pay_lkm_norek    string
 	Pay_idpel        string

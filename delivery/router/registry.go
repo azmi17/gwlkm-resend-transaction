@@ -34,5 +34,5 @@ func RegisterHandler(router *gin.Engine) {
 	apiv1.POST("/tabtrans", handler.GetTabtransInfo)
 
 	apiv1.POST("/resent", handler.ResendTransByStan)
-	apiv1.POST("/transfer-sesama/creditrev", handler.ResendLkmTransferSMprematureRevOnCre)
+	apiv1.POST("/tintcr/reversal", handler.ResendLkmTransferSMprematureRevOnCre)
 }

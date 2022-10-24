@@ -37,7 +37,7 @@ func (a *ApexTransRepoMysqlImpl) GetTransIdApx() (transId int, er error) {
 	return transId, nil
 }
 
-func (a *ApexTransRepoMysqlImpl) GetTxInfoApx(kuitansi string) (transApx entities.TransApx, er error) {
+func (a *ApexTransRepoMysqlImpl) GetTxInfoApx(kuitansi, bankCode string) (transApx entities.TransApx, er error) {
 	row := a.apexDb.QueryRow(`SELECT 
 		tabtrans_id,
 		tgl_trans,
@@ -54,13 +54,12 @@ func (a *ApexTransRepoMysqlImpl) GetTxInfoApx(kuitansi string) (transApx entitie
 		posted_to_gl,
 		kode_kantor,
 		jam,
-		tgl_real_trans,
 		pay_lkm_source,
 		pay_lkm_norek,
 		pay_idpel,
 		pay_biller_code,
 		pay_product_code
-	FROM tabtrans WHERE kuitansi= ? AND my_kode_trans='200' LIMIT 1`, kuitansi)
+	FROM tabtrans WHERE kuitansi= ? AND no_rekening = ? AND my_kode_trans='200' LIMIT 1`, kuitansi, bankCode)
 	er = row.Scan(
 		&transApx.Tabtrans_id,
 		&transApx.Tgl_trans,
@@ -77,7 +76,6 @@ func (a *ApexTransRepoMysqlImpl) GetTxInfoApx(kuitansi string) (transApx entitie
 		&transApx.Posted_to_gl,
 		&transApx.Kode_kantor,
 		&transApx.Jam,
-		&transApx.Tgl_real_trans,
 		&transApx.Pay_lkm_source,
 		&transApx.Pay_lkm_norek,
 		&transApx.Pay_idpel,
@@ -114,13 +112,12 @@ func (a *ApexTransRepoMysqlImpl) DuplicatingTxApx(copy ...entities.TransApx) (er
 		posted_to_gl,
 		kode_kantor,
 		jam,
-		tgl_real_trans,
 		pay_lkm_source,
 		pay_lkm_norek,
 		pay_idpel,
 		pay_biller_code,
 		pay_product_code
-	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 	if er != nil {
 		return errors.New(fmt.Sprint("error while prepare add tabtrans transaction: ", er.Error()))
 	}
@@ -152,7 +149,6 @@ func (a *ApexTransRepoMysqlImpl) DuplicatingTxApx(copy ...entities.TransApx) (er
 			item.Posted_to_gl,
 			item.Kode_kantor,
 			item.Jam,
-			item.Tgl_real_trans,
 			item.Pay_lkm_source,
 			item.Pay_lkm_norek,
 			item.Pay_idpel,
@@ -182,13 +178,12 @@ func (a *ApexTransRepoMysqlImpl) DuplicatingUnitTestTxApx(copy ...entities.Trans
 		posted_to_gl,
 		kode_kantor,
 		jam,
-		tgl_real_trans,
 		pay_lkm_source,
 		pay_lkm_norek,
 		pay_idpel,
 		pay_biller_code,
 		pay_product_code
-	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+	) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
 	if er != nil {
 		return errors.New(fmt.Sprint("error while prepare add tabtrans transaction: ", er.Error()))
 	}
@@ -213,7 +208,6 @@ func (a *ApexTransRepoMysqlImpl) DuplicatingUnitTestTxApx(copy ...entities.Trans
 			item.Posted_to_gl,
 			item.Kode_kantor,
 			item.Jam,
-			item.Tgl_real_trans,
 			item.Pay_lkm_source,
 			item.Pay_lkm_norek,
 			item.Pay_idpel,
@@ -225,9 +219,9 @@ func (a *ApexTransRepoMysqlImpl) DuplicatingUnitTestTxApx(copy ...entities.Trans
 	return nil
 }
 
-func (a *ApexTransRepoMysqlImpl) DeleteTxApx(kuitansi string) (er error) {
+func (a *ApexTransRepoMysqlImpl) DeleteTxApx(kuitansi, bankCode string) (er error) {
 
-	stmt, er := a.apexDb.Prepare("DELETE FROM tabtrans WHERE kuitansi = ?")
+	stmt, er := a.apexDb.Prepare("DELETE FROM tabtrans WHERE kuitansi = ? AND no_rekening = ?")
 	if er != nil {
 		return errors.New(fmt.Sprint("error while prepare delete tabtrans transaction: ", er.Error()))
 	}
@@ -235,14 +229,14 @@ func (a *ApexTransRepoMysqlImpl) DeleteTxApx(kuitansi string) (er error) {
 		_ = stmt.Close()
 	}()
 
-	if _, er := stmt.Exec(kuitansi); er != nil {
+	if _, er := stmt.Exec(kuitansi, bankCode); er != nil {
 		return errors.New(fmt.Sprint("error while delete tabtrans transaction: ", er.Error()))
 	}
 
 	return nil
 }
 
-func (a *ApexTransRepoMysqlImpl) GetTabtransApx(kuitansi string) (listTx []web.TabtransInfoApx, er error) {
+func (a *ApexTransRepoMysqlImpl) GetTabtransListApx(kuitansi string) (listTx []web.TabtransInfoApx, er error) {
 	rows, er := a.apexDb.Query(`SELECT
 		DATE_FORMAT(tgl_trans, "%d/%m/%Y") AS tgl_trans,
 		no_rekening,
@@ -290,7 +284,7 @@ func (a *ApexTransRepoMysqlImpl) GetTabtransApx(kuitansi string) (listTx []web.T
 	}
 }
 
-func (a *ApexTransRepoMysqlImpl) GetLKMTCreditTransferApx(kuitansi string) (transApx entities.TransApx, er error) {
+func (a *ApexTransRepoMysqlImpl) GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, BankCode string) (transApx entities.TransApx, er error) {
 	row := a.apexDb.QueryRow(`SELECT 
 		tabtrans_id,
 		tgl_trans,
@@ -307,13 +301,12 @@ func (a *ApexTransRepoMysqlImpl) GetLKMTCreditTransferApx(kuitansi string) (tran
 		posted_to_gl,
 		kode_kantor,
 		jam,
-		tgl_real_trans,
 		pay_lkm_source,
 		pay_lkm_norek,
 		pay_idpel,
 		pay_biller_code,
 		pay_product_code
-	FROM tabtrans WHERE kuitansi= ? AND my_kode_trans='100' LIMIT 1`, kuitansi)
+	FROM tabtrans WHERE kuitansi= ? AND my_kode_trans= ? AND no_rekening = ? LIMIT 1`, kuitansi, MyKdTrans, BankCode)
 	er = row.Scan(
 		&transApx.Tabtrans_id,
 		&transApx.Tgl_trans,
@@ -330,7 +323,6 @@ func (a *ApexTransRepoMysqlImpl) GetLKMTCreditTransferApx(kuitansi string) (tran
 		&transApx.Posted_to_gl,
 		&transApx.Kode_kantor,
 		&transApx.Jam,
-		&transApx.Tgl_real_trans,
 		&transApx.Pay_lkm_source,
 		&transApx.Pay_lkm_norek,
 		&transApx.Pay_idpel,
@@ -345,4 +337,80 @@ func (a *ApexTransRepoMysqlImpl) GetLKMTCreditTransferApx(kuitansi string) (tran
 		}
 	}
 	return
+}
+
+func (a *ApexTransRepoMysqlImpl) DuplicateCreditTransferSMLkmApx(copy ...entities.TransApx) (er error) {
+
+	apexTransRepo, _ := NewApexTransRepo()
+
+	_, er = apexTransRepo.GetCreditTransferSMLkmApx(copy[0].Kuitansi, "200", copy[0].No_rekening)
+	if er != nil {
+		stmt, er := a.apexDb.Prepare(`INSERT INTO tabtrans(
+			tabtrans_id,
+			tgl_trans,
+			no_rekening,
+			kode_trans,
+			my_kode_trans,
+			pokok,
+			kuitansi,
+			userid,
+			keterangan,
+			verifikasi,
+			tob,
+			sandi_trans,
+			posted_to_gl,
+			kode_kantor,
+			jam,
+			pay_lkm_source,
+			pay_lkm_norek,
+			pay_idpel,
+			pay_biller_code,
+			pay_product_code
+		) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+		if er != nil {
+			return errors.New(fmt.Sprint("error while prepare add tabtrans transaction: ", er.Error()))
+		}
+		defer func() {
+			_ = stmt.Close()
+		}()
+
+		for _, item := range copy {
+
+			// Get Trans ID
+			tabtransId, err := apexTransRepo.GetTransIdApx()
+			if er != nil {
+				return err
+			}
+
+			if _, er := stmt.Exec(
+				tabtransId,
+				item.Tgl_trans,
+				item.No_rekening,
+				item.Kode_trans,
+				item.My_kode_trans,
+				item.Pokok,
+				item.Kuitansi,
+				item.Userid,
+				item.Keterangan,
+				item.Verifikasi,
+				item.Tob,
+				item.Sandi_trans,
+				item.Posted_to_gl,
+				item.Kode_kantor,
+				item.Jam,
+				item.Pay_lkm_source,
+				item.Pay_lkm_norek,
+				item.Pay_idpel,
+				item.Pay_biller_code,
+				item.Pay_product_code); er != nil {
+				return errors.New(fmt.Sprint("error while add tabtrans transaction: ", er.Error()))
+			}
+		}
+	} else {
+		entities.PrintError(err.DuplicateEntry)
+		return err.DuplicateEntry
+
+	}
+
+	return nil
 }

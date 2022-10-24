@@ -19,7 +19,7 @@ func NewApexTransUsecase() ApexTransUsecase {
 func (a *apextransUsecase) GetTabtransApx(kuitansi string) (detailTx []web.TabtransInfoApx, er error) {
 	repo, _ := apextransrepo.NewApexTransRepo()
 
-	detailTx, er = repo.GetTabtransApx(kuitansi)
+	detailTx, er = repo.GetTabtransListApx(kuitansi)
 	if er != nil {
 		return detailTx, er
 	}

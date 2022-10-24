@@ -7,10 +7,11 @@ import (
 
 type ApexTransRepo interface {
 	GetTransIdApx() (int, error)
-	GetTxInfoApx(kuitansi string) (entities.TransApx, error)
+	GetTxInfoApx(kuitansi, bankCode string) (entities.TransApx, error)
 	DuplicatingTxApx(copy ...entities.TransApx) error
 	DuplicatingUnitTestTxApx(copy ...entities.TransApx) error
-	DeleteTxApx(kuitansi string) error
-	GetTabtransApx(kuitansi string) ([]web.TabtransInfoApx, error)
-	GetLKMTCreditTransferApx(kuitansi string) (entities.TransApx, error)
+	DeleteTxApx(kuitansi, bankCode string) error
+	GetTabtransListApx(kuitansi string) ([]web.TabtransInfoApx, error)
+	GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, bankCode string) (entities.TransApx, error)
+	DuplicateCreditTransferSMLkmApx(copy ...entities.TransApx) error
 }

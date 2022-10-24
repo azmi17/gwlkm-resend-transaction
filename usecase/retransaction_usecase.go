@@ -160,7 +160,7 @@ func (r *retransactionUsecase) ResendLkmTransferSMprematureRevOnCre(stan string)
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleLkmTransferSMprematureRevOnCre(&data)
 	if data.ResponseCode != constant.Success {
-		return errors.New(data.Msg) // 44-Transaksi Sudah di reversal
+		return errors.New(data.Msg)
 	} else {
 		return nil
 	}

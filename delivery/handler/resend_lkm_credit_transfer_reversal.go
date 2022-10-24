@@ -22,11 +22,15 @@ func ResendLkmTransferSMprematureRevOnCre(ctx *gin.Context) {
 	resp := web.RetransResponse{}
 	if er != nil {
 		entities.PrintError(er.Error())
-		resp.ResponseCode = "1111"
 		resp.ResponseMessage = er.Error()
+		resp.ResponseCode = "1111"
+		if resp.ResponseMessage == "44-Transaksi Sudah di reversal!" {
+			resp.ResponseCode = "0000"
+		}
+
 	} else {
 		resp.ResponseCode = "0000"
-		resp.ResponseMessage = "Resend transaction succeeded"
+		resp.ResponseMessage = "Resend TINTCR reversal succeeded"
 	}
 	httpio.Response(http.StatusOK, resp)
 }

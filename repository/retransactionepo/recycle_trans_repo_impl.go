@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gwlkm-resend-transaction/entities"
+	"gwlkm-resend-transaction/entities/err"
 	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/repository/apextransrepo"
 	"gwlkm-resend-transaction/repository/constant"
@@ -183,39 +184,40 @@ func (r *retransactionRepoImpl) RecycleGwlkmTransaction(dataTrans *entities.IsoM
 	return nil
 }
 
-func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans *entities.IsoMessageBody) (err error) {
+func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans *entities.IsoMessageBody) (er error) {
 
 	//TODO: Send ISO data to IP & Port GWLKM
 
 	// ISO OBJ INIT
-	iso, err := iso8583uParser.NewISO8583U()
-	if err != nil {
-		entities.PrintError("load package error", err.Error())
+	iso, er := iso8583uParser.NewISO8583U()
+	if er != nil {
+		entities.PrintError("load package error", er.Error())
 		return
 	}
 
 	// UNMARSHAL | RE-COMPOSE ISO
-	err = iso.GoUnMarshal(dataTrans.Msg)
-	if err != nil {
-		entities.PrintError(err.Error())
+	er = iso.GoUnMarshal(dataTrans.Msg)
+	if er != nil {
+		entities.PrintError(er.Error())
 		return
 	}
 	iso.SetMti(dataTrans.MTI)
 	iso.SetField(3, "400700")
+	iso.SetField(12, helper.GetCurrentDate())
 	iso.SetField(104, "TINTCR")
 
 	// MARSHAL PROCS
-	isoMsg, err := iso.GoMarshal()
-	if err != nil {
-		entities.PrintError(err.Error())
+	isoMsg, er := iso.GoMarshal()
+	if er != nil {
+		entities.PrintError(er.Error())
 		return
 	}
 
 	// CORE ADDRS
 	repo, _ := echanneltransrepo.NewEchannelTransRepo()
-	coreAddr, err := repo.GetServeAddr(dataTrans.BankCode)
-	if err != nil {
-		entities.PrintError(err.Error())
+	coreAddr, er := repo.GetServeAddr(dataTrans.BankCode)
+	if er != nil {
+		entities.PrintError(er.Error())
 	}
 
 	// INIT TCP OBJ
@@ -225,9 +227,9 @@ func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans 
 
 	// UNMARSHAL PROCS FROM SENDER
 	if st.Code == tcp.CONNOK {
-		err = iso.GoUnMarshal(st.Message)
-		if err != nil {
-			entities.PrintError(err.Error())
+		er = iso.GoUnMarshal(st.Message)
+		if er != nil {
+			entities.PrintError(er.Error())
 			return
 		}
 		// Override below:
@@ -240,15 +242,15 @@ func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans 
 	}
 
 	// TODO: Begin Recycle apex transaction..
-	if dataTrans.ResponseCode == constant.Success {
+	if dataTrans.ResponseCode == constant.Success || (dataTrans.ResponseCode == "0044" && dataTrans.Msg == "44-Transaksi Sudah di reversal!") {
 
 		apexRepo, _ := apextransrepo.NewApexTransRepo()
 
 		// Get Apx tx..
 		var data entities.TransApx
-		data, er := apexRepo.GetLKMTCreditTransferApx("TINTCR" + iso.GetField(11))
+		data, er = apexRepo.GetCreditTransferSMLkmApx("TINTCR"+iso.GetField(11), "100", dataTrans.BankCode)
 		if er != nil {
-			return er
+			entities.PrintError(err.NoRecord)
 		}
 
 		// Create Apx tx..
@@ -256,18 +258,11 @@ func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans 
 		newTrx.Kode_trans = "290"
 		newTrx.My_kode_trans = "200"
 		newTrx.Keterangan = "Reversal " + data.Keterangan
-		er = apexRepo.DuplicatingTxApx(newTrx)
+		er = apexRepo.DuplicateCreditTransferSMLkmApx(newTrx)
 		if er != nil {
 			return er
 		}
 
-		echannelRepo, _ := echanneltransrepo.NewEchannelTransRepo()
-
-		// Change RC
-		er = echannelRepo.ChangeResponseCode(constant.Resend, iso.GetField(11), 0)
-		if er != nil {
-			return er
-		}
 	}
 
 	return nil

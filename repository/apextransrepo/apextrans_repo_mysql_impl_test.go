@@ -43,7 +43,8 @@ func GetNextIdTabtrans() int {
 func TestGetTabtransTx(t *testing.T) {
 	db := GetConnectionApx()
 	echanneltransrepo := newApexTransRepoMysqlImpl(db)
-	data, err := echanneltransrepo.GetTxInfoApx("TKREDB830378018335")
+	var data entities.TransApx
+	data, err := echanneltransrepo.GetTxInfoApx("TKREDB830378018335", data.No_rekening)
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}
@@ -63,7 +64,7 @@ func TestCreateTabtransTx(t *testing.T) {
 
 	// GET DATA
 	var data entities.TransApx
-	data, err := echanneltransrepo.GetTxInfoApx("TKREDB830378018335")
+	data, err := echanneltransrepo.GetTxInfoApx("TKREDB830378018335", data.No_rekening)
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}
@@ -85,7 +86,7 @@ func TestCreateTabtransTx(t *testing.T) {
 	fmt.Println("Duplicating transaction succeeded..")
 
 	// DELETE DATA
-	err = echanneltransrepo.DeleteTxApx("TKREDB830378018335")
+	err = echanneltransrepo.DeleteTxApx("TKREDB830378018335", "0517")
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}
@@ -99,7 +100,7 @@ func TestInsertDummyTx(t *testing.T) {
 
 	// GET DATA
 	var data entities.TransApx
-	data, err := echanneltransrepo.GetTxInfoApx("TKREDB109003590231")
+	data, err := echanneltransrepo.GetTxInfoApx("TKREDB109003590231", "0095")
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}
@@ -148,10 +149,23 @@ func TestDeleteDummyTx(t *testing.T) {
 	echanneltransrepo := newApexTransRepoMysqlImpl(db)
 
 	// DELETE DATA
-	err := echanneltransrepo.DeleteTxApx("S5100041274590")
+	err := echanneltransrepo.DeleteTxApx("S5100041274590", "0517")
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}
 	fmt.Println("Delete transaction succeeded..")
+
+}
+
+func TestQueryReversalTINTCR(t *testing.T) {
+	db := GetConnectionApx()
+	echanneltransrepo := newApexTransRepoMysqlImpl(db)
+
+	data, err := echanneltransrepo.GetCreditTransferSMLkmApx("TINTCR607984939081", "200", "0517")
+	if err != nil {
+		_ = glg.Log(err.Error())
+	}
+
+	fmt.Println(data.Kuitansi)
 
 }

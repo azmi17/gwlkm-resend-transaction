@@ -36,4 +36,5 @@ type TabtransInfoApx struct {
 	Product_Code string  `json:"product_code"`
 	Biller_Code  string  `json:"biller_code"`
 	User_Id      int     `json:"user_id"`
+	// Tgl_real_trans string  `json:"tgl_real_trans"`
 }
