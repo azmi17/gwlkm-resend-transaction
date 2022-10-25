@@ -4,6 +4,7 @@ import (
 	"gwlkm-resend-transaction/delivery/handler/httpio"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/entities/web"
+	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/usecase"
 	"net/http"
 
@@ -25,6 +26,9 @@ func ResendReversedTransByStan(ctx *gin.Context) {
 		resp.ResponseCode = "1111"
 		resp.ResponseMessage = er.Error()
 		resp.NewStan = newStan
+		if resp.ResponseMessage == helper.AlreadyTransacted {
+			resp.ResponseCode = "0000"
+		}
 	} else {
 		resp.ResponseCode = "0000"
 		resp.ResponseMessage = "Resend gwlkm transaction succeeded"

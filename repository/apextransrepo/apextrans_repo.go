@@ -13,5 +13,5 @@ type ApexTransRepo interface {
 	DeleteTxApx(kuitansi, bankCode string) error
 	GetTabtransListApx(kuitansi string) ([]web.TabtransInfoApx, error)
 	GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, bankCode string) (entities.TransApx, error)
-	DuplicateCreditTransferSMLkmApx(copy ...entities.TransApx) error
+	DuplicateCreditTransferSMLkmApx(copy entities.TransApx) error // DuplicateCreditTransferSMLkmApx(copy ...entities.TransApx) error
 }

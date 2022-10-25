@@ -19,7 +19,7 @@ func GetTabtransInfo(ctx *gin.Context) {
 	httpio.Bind(&payload)
 
 	usecase := usecase.NewApexTransUsecase()
-	detailTx, er := usecase.GetTabtransApx(payload.Kuitansi)
+	detailTx, er := usecase.GetTabtransListApx(payload.Kuitansi)
 	if er != nil {
 		if er == err.NoRecord {
 			httpio.ResponseString(statuscode.StatusNoRecord, "record not found")

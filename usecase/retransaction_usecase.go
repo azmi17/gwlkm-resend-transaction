@@ -15,8 +15,6 @@ type RetransactionUsecase interface {
 	ResendTransaction(stan string) error
 	ResendGwlkmTransaction(stan string) (string, error)
 	GetRetransTxInfo(stan string) (web.RetransTxInfo, error)
-	ChangeResponseCode(web.ChangeResponseCode) error
-	UpdateIsoMsg(web.UpdateIsoMsg) error
 	ResendLkmTransferSMprematureRevOnCre(string) (er error)
 }
 
@@ -119,34 +117,6 @@ func (r *retransactionUsecase) GetRetransTxInfo(stan string) (txInfo web.Retrans
 		return txInfo, er
 	}
 	return txInfo, nil
-}
-
-func (r *retransactionUsecase) ChangeResponseCode(payload web.ChangeResponseCode) (er error) {
-
-	if (payload.Stan == "") || (payload.RC == "") {
-		return err.FieldMustBeExist
-	}
-
-	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
-	er = dataRepo.ChangeResponseCode(payload.RC, payload.Stan, 0)
-	if er != nil {
-		return er
-	}
-	return nil
-}
-
-func (r *retransactionUsecase) UpdateIsoMsg(payload web.UpdateIsoMsg) (er error) {
-
-	if (payload.Iso_Msg == "") || (payload.Stan == "") {
-		return err.FieldMustBeExist
-	}
-
-	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
-	er = dataRepo.UpdateIsoMsg(payload.Iso_Msg, payload.Stan)
-	if er != nil {
-		return er
-	}
-	return nil
 }
 
 func (r *retransactionUsecase) ResendLkmTransferSMprematureRevOnCre(stan string) (er error) {

@@ -339,11 +339,11 @@ func (a *ApexTransRepoMysqlImpl) GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, 
 	return
 }
 
-func (a *ApexTransRepoMysqlImpl) DuplicateCreditTransferSMLkmApx(copy ...entities.TransApx) (er error) {
+func (a *ApexTransRepoMysqlImpl) DuplicateCreditTransferSMLkmApx(copy entities.TransApx) (er error) {
 
 	apexTransRepo, _ := NewApexTransRepo()
 
-	_, er = apexTransRepo.GetCreditTransferSMLkmApx(copy[0].Kuitansi, "200", copy[0].No_rekening)
+	_, er = apexTransRepo.GetCreditTransferSMLkmApx(copy.Kuitansi, "200", copy.No_rekening)
 	if er != nil {
 		stmt, er := a.apexDb.Prepare(`INSERT INTO tabtrans(
 			tabtrans_id,
@@ -374,38 +374,36 @@ func (a *ApexTransRepoMysqlImpl) DuplicateCreditTransferSMLkmApx(copy ...entitie
 			_ = stmt.Close()
 		}()
 
-		for _, item := range copy {
-
-			// Get Trans ID
-			tabtransId, err := apexTransRepo.GetTransIdApx()
-			if er != nil {
-				return err
-			}
-
-			if _, er := stmt.Exec(
-				tabtransId,
-				item.Tgl_trans,
-				item.No_rekening,
-				item.Kode_trans,
-				item.My_kode_trans,
-				item.Pokok,
-				item.Kuitansi,
-				item.Userid,
-				item.Keterangan,
-				item.Verifikasi,
-				item.Tob,
-				item.Sandi_trans,
-				item.Posted_to_gl,
-				item.Kode_kantor,
-				item.Jam,
-				item.Pay_lkm_source,
-				item.Pay_lkm_norek,
-				item.Pay_idpel,
-				item.Pay_biller_code,
-				item.Pay_product_code); er != nil {
-				return errors.New(fmt.Sprint("error while add tabtrans transaction: ", er.Error()))
-			}
+		// Get Trans ID
+		tabtransId, err := apexTransRepo.GetTransIdApx()
+		if er != nil {
+			return err
 		}
+
+		if _, er := stmt.Exec(
+			tabtransId,
+			copy.Tgl_trans,
+			copy.No_rekening,
+			copy.Kode_trans,
+			copy.My_kode_trans,
+			copy.Pokok,
+			copy.Kuitansi,
+			copy.Userid,
+			copy.Keterangan,
+			copy.Verifikasi,
+			copy.Tob,
+			copy.Sandi_trans,
+			copy.Posted_to_gl,
+			copy.Kode_kantor,
+			copy.Jam,
+			copy.Pay_lkm_source,
+			copy.Pay_lkm_norek,
+			copy.Pay_idpel,
+			copy.Pay_biller_code,
+			copy.Pay_product_code); er != nil {
+			return errors.New(fmt.Sprint("error while add tabtrans transaction: ", er.Error()))
+		}
+
 	} else {
 		entities.PrintError(err.DuplicateEntry)
 		return err.DuplicateEntry

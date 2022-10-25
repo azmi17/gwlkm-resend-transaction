@@ -4,6 +4,7 @@ import (
 	"gwlkm-resend-transaction/delivery/handler/httpio"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/entities/web"
+	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/usecase"
 	"net/http"
 
@@ -24,10 +25,9 @@ func ResendLkmTransferSMprematureRevOnCre(ctx *gin.Context) {
 		entities.PrintError(er.Error())
 		resp.ResponseMessage = er.Error()
 		resp.ResponseCode = "1111"
-		if resp.ResponseMessage == "44-Transaksi Sudah di reversal!" {
+		if resp.ResponseMessage == helper.AlreadyReversed {
 			resp.ResponseCode = "0000"
 		}
-
 	} else {
 		resp.ResponseCode = "0000"
 		resp.ResponseMessage = "Resend TINTCR reversal succeeded"

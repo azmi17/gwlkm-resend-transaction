@@ -25,3 +25,8 @@ func ApiResponse(message string, code int, status string, data interface{}) Resp
 
 	return jsonResp
 }
+
+var (
+	AlreadyTransacted = "Transaksi sudah dilakukan"
+	AlreadyReversed   = "44-Transaksi Sudah di reversal!"
+)

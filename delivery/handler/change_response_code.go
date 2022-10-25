@@ -16,7 +16,7 @@ func ChangeResponseCode(ctx *gin.Context) {
 	payload := web.ChangeResponseCode{}
 	httpio.Bind(&payload)
 
-	usecase := usecase.NewRetransactionUsecase()
+	usecase := usecase.NewEchanneltransUsecase()
 	er := usecase.ChangeResponseCode(payload)
 
 	resp := web.RetransResponse{}

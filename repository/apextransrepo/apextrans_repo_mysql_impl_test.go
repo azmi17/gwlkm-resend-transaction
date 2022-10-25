@@ -112,6 +112,7 @@ func TestInsertDummyTx(t *testing.T) {
 	}
 	newTrx1 := data
 	newTrx1.Tabtrans_id = transId
+	newTrx1.No_rekening = "0517"
 	newTrx1.Kode_trans = "290"
 	newTrx1.My_kode_trans = "200"
 	newTrx1.Kuitansi = "S5100041274590"
@@ -127,6 +128,7 @@ func TestInsertDummyTx(t *testing.T) {
 	}
 	newTrx2 := data
 	newTrx2.Tabtrans_id = transId
+	newTrx2.No_rekening = "0517"
 	newTrx2.Kode_trans = "190"
 	newTrx2.My_kode_trans = "100"
 	newTrx2.Kuitansi = "S5100041274590"

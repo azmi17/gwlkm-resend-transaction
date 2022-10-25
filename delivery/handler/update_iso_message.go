@@ -24,7 +24,7 @@ func UpdateIsoMsg(ctx *gin.Context) {
 	// 	ctx.JSON(http.StatusUnprocessableEntity, response)
 	// 	return
 	// }
-	usecase := usecase.NewRetransactionUsecase()
+	usecase := usecase.NewEchanneltransUsecase()
 	er := usecase.UpdateIsoMsg(payload)
 	resp := web.RetransResponse{}
 	if er != nil {

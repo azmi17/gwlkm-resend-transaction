@@ -187,7 +187,6 @@ func (r *retransactionRepoImpl) RecycleGwlkmTransaction(dataTrans *entities.IsoM
 func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans *entities.IsoMessageBody) (er error) {
 
 	//TODO: Send ISO data to IP & Port GWLKM
-
 	// ISO OBJ INIT
 	iso, er := iso8583uParser.NewISO8583U()
 	if er != nil {
@@ -242,17 +241,14 @@ func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans 
 	}
 
 	// TODO: Begin Recycle apex transaction..
-	if dataTrans.ResponseCode == constant.Success || (dataTrans.ResponseCode == "0044" && dataTrans.Msg == "44-Transaksi Sudah di reversal!") {
-
+	if dataTrans.ResponseCode == constant.Success || (dataTrans.ResponseCode == constant.TransactedResponseGwLKM && dataTrans.Msg == helper.AlreadyReversed) {
 		apexRepo, _ := apextransrepo.NewApexTransRepo()
-
 		// Get Apx tx..
 		var data entities.TransApx
 		data, er = apexRepo.GetCreditTransferSMLkmApx("TINTCR"+iso.GetField(11), "100", dataTrans.BankCode)
 		if er != nil {
 			entities.PrintError(err.NoRecord)
 		}
-
 		// Create Apx tx..
 		newTrx := data
 		newTrx.Kode_trans = "290"
@@ -262,8 +258,6 @@ func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans 
 		if er != nil {
 			return er
 		}
-
 	}
-
 	return nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type ApexTransUsecase interface {
-	GetTabtransApx(kuitansi string) ([]web.TabtransInfoApx, error)
+	GetTabtransListApx(kuitansi string) ([]web.TabtransInfoApx, error)
 }
 
 type apextransUsecase struct{}
@@ -16,7 +16,7 @@ func NewApexTransUsecase() ApexTransUsecase {
 	return &apextransUsecase{}
 }
 
-func (a *apextransUsecase) GetTabtransApx(kuitansi string) (detailTx []web.TabtransInfoApx, er error) {
+func (a *apextransUsecase) GetTabtransListApx(kuitansi string) (detailTx []web.TabtransInfoApx, er error) {
 	repo, _ := apextransrepo.NewApexTransRepo()
 
 	detailTx, er = repo.GetTabtransListApx(kuitansi)
