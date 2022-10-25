@@ -106,6 +106,12 @@ func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan stri
 			return newStan, err.InternalServiceError
 		}
 	} else {
+		if isoMsg.Msg == helper.AlreadyTransacted {
+			er = dataRepo.ChangeResponseCode(constant.Success, newTrx.Stan, 0)
+			if er != nil {
+				return newStan, err.InternalServiceError
+			}
+		}
 		er = errors.New(isoMsg.Msg)
 	}
 
