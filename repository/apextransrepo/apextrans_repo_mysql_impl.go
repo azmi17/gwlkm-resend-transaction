@@ -37,7 +37,7 @@ func (a *ApexTransRepoMysqlImpl) GetTransIdApx() (transId int, er error) {
 	return transId, nil
 }
 
-func (a *ApexTransRepoMysqlImpl) GetTxInfoApx(kuitansi, bankCode string) (transApx entities.TransApx, er error) {
+func (a *ApexTransRepoMysqlImpl) GetTabtransTxInfoApx(kuitansi, bankCode string) (transApx entities.TransApx, er error) {
 	row := a.apexDb.QueryRow(`SELECT 
 		tabtrans_id,
 		tgl_trans,
@@ -405,7 +405,7 @@ func (a *ApexTransRepoMysqlImpl) DuplicateCreditTransferSMLkmApx(copy entities.T
 		}
 
 	} else {
-		entities.PrintError(err.DuplicateEntry)
+		entities.PrintError(fmt.Sprint(err.DuplicateEntry, ", Apex: ", copy.Kuitansi, "(290) is exist"))
 		return err.DuplicateEntry
 
 	}

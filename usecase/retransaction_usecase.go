@@ -114,9 +114,9 @@ func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan stri
 		}
 		er = errors.New(isoMsg.Msg)
 	}
-
 	return newStan, er
 }
+
 func (r *retransactionUsecase) GetRetransTxInfo(stan string) (txInfo web.RetransTxInfo, er error) {
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
 	if txInfo, er = dataRepo.GetRetransTxInfo(stan); er != nil {

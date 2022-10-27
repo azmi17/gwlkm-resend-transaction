@@ -301,7 +301,7 @@ func (e *EchannelTransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory)
 
 		// Get Apx tx..
 		var data entities.TransApx
-		data, er = dataRepoApex.GetTxInfoApx(copy.Product_Code+copy.Ref_Stan, copy.Bank_Code)
+		data, er = dataRepoApex.GetTabtransTxInfoApx(copy.Product_Code+copy.Ref_Stan, copy.Bank_Code)
 		if er != nil {
 			return er
 		}

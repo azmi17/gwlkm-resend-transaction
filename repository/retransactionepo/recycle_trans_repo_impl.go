@@ -247,7 +247,7 @@ func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans 
 		var data entities.TransApx
 		data, er = apexRepo.GetCreditTransferSMLkmApx("TINTCR"+iso.GetField(11), "100", dataTrans.BankCode)
 		if er != nil {
-			entities.PrintError(err.NoRecord)
+			entities.PrintError(fmt.Sprint(err.NoRecord, ", [TINTDB only]"))
 		}
 		// Create Apx tx..
 		newTrx := data

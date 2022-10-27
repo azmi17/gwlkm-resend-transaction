@@ -44,7 +44,7 @@ func TestGetTabtransTx(t *testing.T) {
 	db := GetConnectionApx()
 	echanneltransrepo := newApexTransRepoMysqlImpl(db)
 	var data entities.TransApx
-	data, err := echanneltransrepo.GetTxInfoApx("TKREDB830378018335", data.No_rekening)
+	data, err := echanneltransrepo.GetTabtransTxInfoApx("TKREDB830378018335", data.No_rekening)
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}
@@ -64,7 +64,7 @@ func TestCreateTabtransTx(t *testing.T) {
 
 	// GET DATA
 	var data entities.TransApx
-	data, err := echanneltransrepo.GetTxInfoApx("TKREDB830378018335", data.No_rekening)
+	data, err := echanneltransrepo.GetTabtransTxInfoApx("TKREDB830378018335", data.No_rekening)
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}
@@ -100,7 +100,7 @@ func TestInsertDummyTx(t *testing.T) {
 
 	// GET DATA
 	var data entities.TransApx
-	data, err := echanneltransrepo.GetTxInfoApx("TKREDB109003590231", "0095")
+	data, err := echanneltransrepo.GetTabtransTxInfoApx("TKREDB109003590231", "0095")
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}

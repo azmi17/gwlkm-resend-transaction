@@ -7,7 +7,7 @@ import (
 
 type ApexTransRepo interface {
 	GetTransIdApx() (int, error)
-	GetTxInfoApx(kuitansi, bankCode string) (entities.TransApx, error)
+	GetTabtransTxInfoApx(kuitansi, bankCode string) (entities.TransApx, error)
 	DuplicatingTxApx(copy ...entities.TransApx) error
 	DuplicatingUnitTestTxApx(copy ...entities.TransApx) error
 	DeleteTxApx(kuitansi, bankCode string) error
