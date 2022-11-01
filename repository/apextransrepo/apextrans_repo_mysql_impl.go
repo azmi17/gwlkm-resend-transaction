@@ -59,7 +59,7 @@ func (a *ApexTransRepoMysqlImpl) GetTabtransTxInfoApx(kuitansi, bankCode string)
 		pay_idpel,
 		pay_biller_code,
 		pay_product_code
-	FROM tabtrans WHERE kuitansi= ? AND no_rekening = ? AND my_kode_trans='200' LIMIT 1`, kuitansi, bankCode)
+	FROM tabtrans WHERE kuitansi= ? AND pay_lkm_source = ? AND my_kode_trans='200' LIMIT 1`, kuitansi, bankCode)
 	er = row.Scan(
 		&transApx.Tabtrans_id,
 		&transApx.Tgl_trans,
@@ -221,7 +221,7 @@ func (a *ApexTransRepoMysqlImpl) DuplicatingUnitTestTxApx(copy ...entities.Trans
 
 func (a *ApexTransRepoMysqlImpl) DeleteTxApx(kuitansi, bankCode string) (er error) {
 
-	stmt, er := a.apexDb.Prepare("DELETE FROM tabtrans WHERE kuitansi = ? AND no_rekening = ?")
+	stmt, er := a.apexDb.Prepare("DELETE FROM tabtrans WHERE kuitansi = ? AND pay_lkm_source = ?")
 	if er != nil {
 		return errors.New(fmt.Sprint("error while prepare delete tabtrans transaction: ", er.Error()))
 	}
@@ -306,7 +306,7 @@ func (a *ApexTransRepoMysqlImpl) GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, 
 		pay_idpel,
 		pay_biller_code,
 		pay_product_code
-	FROM tabtrans WHERE kuitansi= ? AND my_kode_trans= ? AND no_rekening = ? LIMIT 1`, kuitansi, MyKdTrans, BankCode)
+	FROM tabtrans WHERE kuitansi= ? AND my_kode_trans= ? AND pay_lkm_source = ? LIMIT 1`, kuitansi, MyKdTrans, BankCode)
 	er = row.Scan(
 		&transApx.Tabtrans_id,
 		&transApx.Tgl_trans,
