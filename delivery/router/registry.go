@@ -32,6 +32,7 @@ func RegisterHandler(router *gin.Engine) {
 	apiv1.PUT("/change-rc", handler.ChangeResponseCode)
 	apiv1.PUT("/isomsg", handler.UpdateIsoMsg)
 	apiv1.POST("/tabtrans", handler.GetTabtransInfo)
+	apiv1.POST("/tabtrans-bystan", handler.GetTabtransInfoByStan)
 
 	apiv1.POST("/resent", handler.ResendTransByStan)
 	apiv1.POST("/tintcr/reversal", handler.ResendLkmTransferSMprematureRevOnCre)
