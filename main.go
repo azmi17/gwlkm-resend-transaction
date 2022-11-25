@@ -119,6 +119,24 @@ func PrepareDatabase() {
 		os.Exit(1)
 	}
 
+	// # App DB: Sys Apex
+	databasefactory.SysApex, er = databasefactory.GetDatabase()
+	databasefactory.SysApex.SetEnvironmentVariablePrefix("sysapx.")
+	if er != nil {
+		glg.Fatal(er.Error())
+	}
+
+	_ = glg.Log("Connecting to sys apex..")
+	if er = databasefactory.SysApex.Connect(); er != nil {
+		_ = glg.Error("Connection to sys apex failed: ", er.Error())
+		os.Exit(1)
+	}
+
+	if er = databasefactory.SysApex.Ping(); er != nil {
+		_ = glg.Error("Cannot ping sys apex: ", er.Error())
+		os.Exit(1)
+	}
+
 	_ = glg.Log("Database Connected")
 	_ = glg.Log("Service Started")
 }

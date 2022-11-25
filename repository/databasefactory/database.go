@@ -1,6 +1,6 @@
 package databasefactory
 
-var Echannel, Apex Database
+var Echannel, Apex, SysApex Database
 
 type Database interface {
 	Connect() error

@@ -10,8 +10,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"github.com/randyardiansyah25/libpkg/net/tcp"
 
+	en_translations "github.com/go-playground/validator/v10/translations/en"
 	iso8583uParser "github.com/randyardiansyah25/iso8583u/parser"
 	aes "github.com/randyardiansyah25/libpkg/security/aes"
 )
@@ -389,4 +393,43 @@ func TestGetReversedData(t *testing.T) {
 		log.Fatal(err.Error())
 	}
 	fmt.Println("Ref STAN:", len(data.Ref_Stan))
+}
+
+type person struct {
+	Name                string `validate:"required,min=4,max=15"`
+	Email               string `validate:"required,email"`
+	Age                 int    `validate:"required,numeric,min=18"`
+	DriverLicenseNumber string `validate:"omitempty,len=12,numeric"`
+}
+
+func translateError(err error, trans ut.Translator) (errs []error) {
+	if err == nil {
+		return nil
+	}
+	validatorErrs := err.(validator.ValidationErrors)
+	for _, e := range validatorErrs {
+		translatedErr := fmt.Errorf(e.Translate(trans))
+		errs = append(errs, translatedErr)
+	}
+	return errs
+}
+
+func TestValidator(t *testing.T) {
+	validate := validator.New()
+	english := en.New()
+	uni := ut.New(english, english)
+	trans, _ := uni.GetTranslator("en")
+	en_translations.RegisterDefaultTranslations(validate, trans)
+
+	p := person{
+		Name:                "",
+		Email:               "",
+		Age:                 0,
+		DriverLicenseNumber: "",
+	}
+
+	err := validate.Struct(p)
+	errs := translateError(err, trans)
+	fmt.Println(errs)
+
 }
