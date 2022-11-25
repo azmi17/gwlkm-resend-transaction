@@ -10,6 +10,7 @@ import (
 	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/repository/apextransrepo"
 	"gwlkm-resend-transaction/repository/constant"
+	"time"
 )
 
 func newEchannelTransRepoMysqlImpl(echannelConn *sql.DB) EchannelTransRepo {
@@ -308,6 +309,7 @@ func (e *EchannelTransRepoMysqlImpl) DuplicatingData(copy entities.TransHistory)
 
 		// Create Apx tx..
 		newTrx := data
+		newTrx.Tgl_trans = time.Now()
 		newTrx.Kuitansi = copy.Product_Code + copy.Stan
 		newTrx.Userid = helper.GetUserIDApp()
 		er = dataRepoApex.DuplicatingTxApx(newTrx)
