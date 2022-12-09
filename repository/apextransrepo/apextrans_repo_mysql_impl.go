@@ -284,7 +284,7 @@ func (a *ApexTransRepoMysqlImpl) GetTabtransListApx(kuitansi string) (listTx []w
 	}
 }
 
-func (a *ApexTransRepoMysqlImpl) GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, BankCode string) (transApx entities.TransApx, er error) {
+func (a *ApexTransRepoMysqlImpl) GetPrimaryTrxBelongToRecreateApx(kuitansi, MyKdTrans, BankCode string) (transApx entities.TransApx, er error) {
 	row := a.apexDb.QueryRow(`SELECT 
 		tabtrans_id,
 		tgl_trans,
@@ -339,11 +339,11 @@ func (a *ApexTransRepoMysqlImpl) GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, 
 	return
 }
 
-func (a *ApexTransRepoMysqlImpl) DuplicateCreditTransferSMLkmApx(copy entities.TransApx) (er error) {
+func (a *ApexTransRepoMysqlImpl) DuplicateTrxBelongToRecreateApx(copy entities.TransApx) (er error) {
 
 	apexTransRepo, _ := NewApexTransRepo()
 
-	_, er = apexTransRepo.GetCreditTransferSMLkmApx(copy.Kuitansi, "200", copy.No_rekening)
+	_, er = apexTransRepo.GetPrimaryTrxBelongToRecreateApx(copy.Kuitansi, "200", copy.No_rekening)
 	if er != nil {
 		stmt, er := a.apexDb.Prepare(`INSERT INTO tabtrans(
 			tabtrans_id,

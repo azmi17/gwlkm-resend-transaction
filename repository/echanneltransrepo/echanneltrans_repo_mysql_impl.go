@@ -26,6 +26,8 @@ type EchannelTransRepoMysqlImpl struct {
 func (e *EchannelTransRepoMysqlImpl) GetData(stan string) (data entities.IsoMessageBody, er error) {
 	row := e.echannelDb.QueryRow(`SELECT 
 		mti,
+		stan,
+		tgl_trans_str,
 		processing_code,
 		bank_code,
 		msg
@@ -33,6 +35,8 @@ func (e *EchannelTransRepoMysqlImpl) GetData(stan string) (data entities.IsoMess
 
 	er = row.Scan(
 		&data.MTI,
+		&data.Stan,
+		&data.DateTime,
 		&data.ProcessingCode,
 		&data.BankCode,
 		&data.Msg,

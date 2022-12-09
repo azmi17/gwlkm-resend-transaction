@@ -38,7 +38,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessag
 		return
 	}
 	isoUnMarshal.SetMti(dataTrans.MTI)
-	isoUnMarshal.SetField(3, "200700")
+	isoUnMarshal.SetField(3, "200700") // => 400700 extract current date (?)
 	isoUnMarshal.SetField(4, isoUnMarshal.GetField(4))
 	isoUnMarshal.SetField(5, isoUnMarshal.GetField(5))
 	isoUnMarshal.SetField(6, isoUnMarshal.GetField(6))
@@ -59,7 +59,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessag
 	isoUnMarshal.SetField(61, isoUnMarshal.GetField(61))
 	isoUnMarshal.SetField(100, isoUnMarshal.GetField(100))
 	isoUnMarshal.SetField(103, isoUnMarshal.GetField(103))
-	isoUnMarshal.SetField(104, "TINTCR")
+	isoUnMarshal.SetField(104, "TINTDB")
 
 	// MARSHAL PROCS
 	isoMsg, err := isoUnMarshal.GoMarshal()
@@ -245,7 +245,7 @@ func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans 
 		apexRepo, _ := apextransrepo.NewApexTransRepo()
 		// Get Apx tx..
 		var data entities.TransApx
-		data, er = apexRepo.GetCreditTransferSMLkmApx("TINTCR"+iso.GetField(11), "100", dataTrans.BankCode)
+		data, er = apexRepo.GetPrimaryTrxBelongToRecreateApx("TINTCR"+iso.GetField(11), "100", dataTrans.BankCode)
 		if er != nil {
 			entities.PrintError(fmt.Sprint(err.NoRecord, ", [TINTDB only]"))
 		}
@@ -254,10 +254,132 @@ func (r *retransactionRepoImpl) RecycleLkmTransferSMprematureRevOnCre(dataTrans 
 		newTrx.Kode_trans = "290"
 		newTrx.My_kode_trans = "200"
 		newTrx.Keterangan = "Reversal " + data.Keterangan
-		er = apexRepo.DuplicateCreditTransferSMLkmApx(newTrx)
+		er = apexRepo.DuplicateTrxBelongToRecreateApx(newTrx)
 		if er != nil {
 			return er
 		}
 	}
 	return nil
+}
+
+func (r *retransactionRepoImpl) ResendReversalGwlkmTransaction(dataTrans *entities.IsoMessageBody) (er error) {
+
+	//TODO: Send ISO data to IP & Port GWLKM
+	// ISO OBJ INIT
+	iso, er := iso8583uParser.NewISO8583U()
+	if er != nil {
+		entities.PrintError("load package error", er.Error())
+		return
+	}
+
+	// UNMARSHAL | RE-COMPOSE ISO
+	er = iso.GoUnMarshal(dataTrans.Msg)
+	if er != nil {
+		entities.PrintError(er.Error())
+		return
+	}
+	iso.SetMti(dataTrans.MTI)
+	iso.SetField(3, "400700")
+
+	// MARSHAL PROCS
+	isoMsg, er := iso.GoMarshal()
+	if er != nil {
+		entities.PrintError(er.Error())
+		return
+	}
+
+	// CORE ADDRS
+	repo, _ := echanneltransrepo.NewEchannelTransRepo()
+	coreAddr, er := repo.GetServeAddr(dataTrans.BankCode)
+	if er != nil {
+		entities.PrintError(er.Error())
+	}
+
+	// INIT TCP OBJ
+	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
+	entities.PrintLog("SEND:\n", iso.PrettyPrint())
+	st := client.Send(tcp.SetHeader(isoMsg, 4))
+
+	// UNMARSHAL PROCS FROM SENDER
+	if st.Code == tcp.CONNOK {
+		er = iso.GoUnMarshal(st.Message)
+		if er != nil {
+			entities.PrintError(er.Error())
+			return
+		}
+		// Override below:
+		dataTrans.ResponseCode = iso.GetField(39)
+		dataTrans.Msg = iso.GetField(48)
+		entities.PrintLog("RECV:\n", iso.PrettyPrint())
+	} else {
+		dataTrans.Msg = fmt.Sprint("reversal failed: ", st.Message)
+		return errors.New(dataTrans.Msg)
+	}
+
+	return nil
+}
+
+func (r *retransactionRepoImpl) ResendReversalBeforeRecycleGwlkmTransaction(stan string) (er error) {
+
+	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
+	var data entities.IsoMessageBody
+	if data, er = dataRepo.GetData(stan); er != nil {
+		return er
+	}
+
+	//TODO: Send ISO data to IP & Port GWLKM
+	// ISO OBJ INIT
+	iso, er := iso8583uParser.NewISO8583U()
+	if er != nil {
+		entities.PrintError("load package error", er.Error())
+		return
+	}
+
+	// UNMARSHAL | RE-COMPOSE ISO
+	er = iso.GoUnMarshal(data.Msg)
+	if er != nil {
+		entities.PrintError(er.Error())
+		return
+	}
+	iso.SetMti(data.MTI)
+	iso.SetField(3, "400700")
+
+	// MARSHAL PROCS
+	isoMsg, er := iso.GoMarshal()
+	if er != nil {
+		entities.PrintError(er.Error())
+		return
+	}
+
+	// CORE ADDRS
+	repo, _ := echanneltransrepo.NewEchannelTransRepo()
+	coreAddr, er := repo.GetServeAddr(data.BankCode)
+	if er != nil {
+		entities.PrintError(er.Error())
+	}
+
+	// INIT TCP OBJ
+	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
+	entities.PrintLog("SEND:\n", iso.PrettyPrint())
+	st := client.Send(tcp.SetHeader(isoMsg, 4))
+
+	// UNMARSHAL PROCS FROM SENDER
+	if st.Code == tcp.CONNOK {
+		er = iso.GoUnMarshal(st.Message)
+		if er != nil {
+			entities.PrintError(er.Error())
+			return
+		}
+		// Override below:
+		data.ResponseCode = iso.GetField(39)
+		data.Msg = iso.GetField(48)
+		entities.PrintLog("RECV:\n", iso.PrettyPrint())
+
+	} else {
+		data.Msg = fmt.Sprint("Reversal failed: ", st.Message)
+		return errors.New(data.Msg)
+	}
+
+	entities.PrintLog(data.Msg)
+	return er
 }

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type RequestIO interface {
@@ -20,6 +21,7 @@ type RequestIO interface {
 	ResponseWithAbort(statuscode int, responseBody interface{})
 	ResponseString(statusCode int, response string)
 	ResponseStringWithAbort(statusCode int, response string)
+	BindWithErr(obj interface{}) error
 }
 
 type formio struct {
@@ -35,7 +37,7 @@ func NewRequestIO(ctx *gin.Context) RequestIO {
 	}
 }
 
-//No Content Receiver | untuk get (tanpa ada query string)
+// No Content Receiver | untuk get (tanpa ada query string)
 func (f *formio) Recv() {
 	header := params.Header{}
 	path := fmt.Sprintf("%s %s", f.request.Method, f.request.URL.Path)
@@ -43,14 +45,24 @@ func (f *formio) Recv() {
 	go receiveForm("RECV", header, "", f.request.RemoteAddr, path)
 }
 
-//These methods use MustBindWith under the hood. If there is a binding error, the request is aborted with c.AbortWithError(400, err).SetType(ErrorTypeBind).
-//This sets the response status code to 400 and the Content-Type header is set to text/plain; charset=utf-8
+// These methods use MustBindWith under the hood. If there is a binding error, the request is aborted with c.AbortWithError(400, err).SetType(ErrorTypeBind).
+// This sets the response status code to 400 and the Content-Type header is set to text/plain; charset=utf-8
 func (f *formio) Bind(body interface{}) {
 	header := params.Header{}
 	path := fmt.Sprintf("%s %s", f.request.Method, f.request.URL.Path)
 	_ = f.context.ShouldBindHeader(&header)
 	_ = f.context.Bind(body)
 	go receiveForm("RECV", header, body, f.request.RemoteAddr, path)
+}
+
+func (f *formio) BindWithErr(body interface{}) error {
+	header := params.Header{}
+	path := fmt.Sprintf("%s %s", f.request.Method, f.request.URL.Path)
+	// _ = f.context.Bind(body)
+	_ = f.context.ShouldBindHeader(&header)
+	b := binding.Default(f.request.Method, header.ContentType)
+	go receiveForm("RECV", header, body, f.request.RemoteAddr, path)
+	return f.context.ShouldBindWith(body, b)
 }
 
 //These methods use MustBindWith under the hood. If there is a binding error, the request is aborted with c.AbortWithError(400, err).SetType(ErrorTypeBind).

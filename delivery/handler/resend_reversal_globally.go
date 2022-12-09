@@ -1,0 +1,36 @@
+package handler
+
+import (
+	"gwlkm-resend-transaction/delivery/handler/httpio"
+	"gwlkm-resend-transaction/entities"
+	"gwlkm-resend-transaction/entities/web"
+	"gwlkm-resend-transaction/helper"
+	"gwlkm-resend-transaction/usecase"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
+
+func ResendReversalGwlkm(ctx *gin.Context) {
+	httpio := httpio.NewRequestIO(ctx)
+
+	payload := web.StanFilter{}
+	httpio.Bind(&payload)
+
+	usecase := usecase.NewRetransactionUsecase()
+	er := usecase.ResendReversalBeforeRecycleGwlkmTrx(payload.Stan)
+
+	resp := web.RetransResponse{}
+	if er != nil {
+		entities.PrintError(er.Error())
+		resp.ResponseMessage = er.Error()
+		resp.ResponseCode = "1111"
+		if resp.ResponseMessage == helper.AlreadyReversed {
+			resp.ResponseCode = "0000"
+		}
+	} else {
+		resp.ResponseCode = "0000"
+		resp.ResponseMessage = "Resend reversal succeeded"
+	}
+	httpio.Response(http.StatusOK, resp)
+}

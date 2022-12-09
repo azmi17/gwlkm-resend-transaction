@@ -163,7 +163,7 @@ func TestQueryReversalTINTCR(t *testing.T) {
 	db := GetConnectionApx()
 	echanneltransrepo := newApexTransRepoMysqlImpl(db)
 
-	data, err := echanneltransrepo.GetCreditTransferSMLkmApx("TINTCR607984939081", "200", "0517")
+	data, err := echanneltransrepo.GetPrimaryTrxBelongToRecreateApx("TINTCR607984939081", "200", "0517")
 	if err != nil {
 		_ = glg.Log(err.Error())
 	}

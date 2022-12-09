@@ -16,6 +16,7 @@ type RetransactionUsecase interface {
 	ResendGwlkmTransaction(stan string) (string, error)
 	GetRetransTxInfo(stan string) (web.RetransTxInfo, error)
 	ResendLkmTransferSMprematureRevOnCre(string) (er error)
+	ResendReversalBeforeRecycleGwlkmTrx(string) (er error)
 }
 
 type retransactionUsecase struct{}
@@ -47,6 +48,7 @@ func (r *retransactionUsecase) ResendTransaction(stan string) (er error) {
 
 func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan string, er error) {
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
+	reTransRepo := retransactionepo.NewRetransactionRepo()
 
 	// IS REPEAT CONDITION
 	isRepeat := false
@@ -69,9 +71,10 @@ func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan stri
 	newTrx := originData
 	newStan = originData.Stan
 
-	// If not repeat
+	// If the condition is false, the statement below will be skipped
+	oldStan := originData.Stan
 	if !isRepeat {
-		// Duplicate & assign new value from origin record..
+		// assign new value from origin record..
 		newTrx.Stan = "RT" + helper.GenerateSTAN()[2:12]
 		newStan = newTrx.Stan
 		newTrx.Ref_Stan = originData.Stan
@@ -80,11 +83,13 @@ func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan stri
 		newTrx.Ref = originData.Product_Code + newTrx.Stan
 		newTrx.Response_Code = constant.Suspect
 
-		// DO: Duplicate Data
+		// DO: Duplicate origin data
 		er = dataRepo.DuplicatingData(newTrx)
 		if er != nil {
 			return newStan, er
 		}
+	} else {
+		oldStan = newTrx.Ref_Stan
 	}
 
 	// Extracting TransHistory into IsoMessageBody..
@@ -97,8 +102,13 @@ func (r *retransactionUsecase) ResendGwlkmTransaction(stan string) (newStan stri
 		Msg:            newTrx.Msg,
 	}
 
+	// DO: Send reversal before RecycleGwlkmTransaction()
+	er = reTransRepo.ResendReversalBeforeRecycleGwlkmTransaction(oldStan)
+	if er != nil {
+		entities.PrintError(er.Error())
+	}
+
 	// DO: Recycle Transaction
-	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleGwlkmTransaction(&isoMsg)
 	if isoMsg.ResponseCode == constant.Success {
 		er = dataRepo.ChangeResponseCode(constant.Success, newTrx.Stan, 0)
@@ -135,6 +145,23 @@ func (r *retransactionUsecase) ResendLkmTransferSMprematureRevOnCre(stan string)
 
 	reTransRepo := retransactionepo.NewRetransactionRepo()
 	reTransRepo.RecycleLkmTransferSMprematureRevOnCre(&data)
+	if data.ResponseCode != constant.Success {
+		return errors.New(data.Msg)
+	} else {
+		return nil
+	}
+}
+
+func (r *retransactionUsecase) ResendReversalBeforeRecycleGwlkmTrx(stan string) (er error) {
+
+	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
+	var data entities.IsoMessageBody
+	if data, er = dataRepo.GetData(stan); er != nil {
+		return er
+	}
+
+	reTransRepo := retransactionepo.NewRetransactionRepo()
+	reTransRepo.ResendReversalGwlkmTransaction(&data)
 	if data.ResponseCode != constant.Success {
 		return errors.New(data.Msg)
 	} else {

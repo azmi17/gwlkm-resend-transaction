@@ -37,4 +37,7 @@ func RegisterHandler(router *gin.Engine) {
 	apiv1.POST("/resent", handler.ResendTransByStan)
 	apiv1.POST("/tintcr/reversal", handler.ResendLkmTransferSMprematureRevOnCre)
 	apiv1.PUT("/reset-password-apex", handler.ResetApexPassword)
+
+	apiv1.POST("/resend/reversal", handler.ResendReversalGwlkm)
+	apiv1.POST("/apex/recreate", handler.RecreateSuccessTransactionApx)
 }

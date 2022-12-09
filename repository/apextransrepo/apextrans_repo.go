@@ -12,7 +12,9 @@ type ApexTransRepo interface {
 	DuplicatingUnitTestTxApx(copy ...entities.TransApx) error
 	DeleteTxApx(kuitansi, bankCode string) error
 	GetTabtransListApx(kuitansi string) ([]web.TabtransInfoApx, error)
-	GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, bankCode string) (entities.TransApx, error)
-	DuplicateCreditTransferSMLkmApx(copy entities.TransApx) error // DuplicateCreditTransferSMLkmApx(copy ...entities.TransApx) error
+	// GetCreditTransferSMLkmApx(kuitansi, MyKdTrans, bankCode string) (entities.TransApx, error)
+	// DuplicateCreditTransferSMLkmApx(copy entities.TransApx) error
+	GetPrimaryTrxBelongToRecreateApx(kuitansi, MyKdTrans, bankCode string) (entities.TransApx, error)
+	DuplicateTrxBelongToRecreateApx(copy entities.TransApx) error
 	GetTabtransListByStanApx(stan string) ([]web.TabtransInfoApx, error)
 }
