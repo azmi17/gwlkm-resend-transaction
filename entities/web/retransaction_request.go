@@ -1,7 +1,7 @@
 package web
 
 type StanFilter struct {
-	Stan string `form:"stan"`
+	Stan string `form:"stan" binding:"required"`
 }
 
 type RecreateApexRequest struct {
@@ -14,11 +14,11 @@ type KuitansiFilter struct {
 }
 
 type ChangeResponseCode struct {
-	Stan string `form:"stan"`
-	RC   string `form:"response_code"`
+	Stan string `form:"stan" binding:"required"`
+	RC   string `form:"response_code" binding:"required"`
 }
 
 type UpdateIsoMsg struct {
-	Stan    string `form:"stan"`
-	Iso_Msg string `form:"iso_message"`
+	Stan    string `form:"stan" binding:"required"`
+	Iso_Msg string `form:"iso_message" binding:"required"`
 }

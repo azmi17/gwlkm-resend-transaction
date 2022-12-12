@@ -16,7 +16,7 @@ type RetransactionUsecase interface {
 	ResendGwlkmTransaction(stan string) (string, error)
 	GetRetransTxInfo(stan string) (web.RetransTxInfo, error)
 	ResendLkmTransferSMprematureRevOnCre(string) (er error)
-	ResendReversalBeforeRecycleGwlkmTrx(string) (er error)
+	ResendReversalGwlkmTransaction(string) (er error)
 }
 
 type retransactionUsecase struct{}
@@ -152,7 +152,7 @@ func (r *retransactionUsecase) ResendLkmTransferSMprematureRevOnCre(stan string)
 	}
 }
 
-func (r *retransactionUsecase) ResendReversalBeforeRecycleGwlkmTrx(stan string) (er error) {
+func (r *retransactionUsecase) ResendReversalGwlkmTransaction(stan string) (er error) {
 
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
 	var data entities.IsoMessageBody

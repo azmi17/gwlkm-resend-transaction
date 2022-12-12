@@ -17,4 +17,12 @@ type ApexTransRepo interface {
 	GetPrimaryTrxBelongToRecreateApx(kuitansi, MyKdTrans, bankCode string) (entities.TransApx, error)
 	DuplicateTrxBelongToRecreateApx(copy entities.TransApx) error
 	GetTabtransListByStanApx(stan string) ([]web.TabtransInfoApx, error)
+
+	// ===================================================================================================================================================
+	// ==================================================================TEMPORARY FUNCTIONS==============================================================
+	// ===================================================================================================================================================
+	GetRekeningLKMByStatusActive() ([]string, error)
+	CalculateSaldoOnRekeningLKM(kodeLKM string) (entities.CalculateSaldoResult, error)
+	RepostingSaldoOnRekeningLKMByScheduler(listOfKodeLKM ...string) error
+	doRepostingSaldoProcs(data string) error
 }

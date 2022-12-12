@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"gwlkm-resend-transaction/entities/err"
 	"gwlkm-resend-transaction/entities/web"
 	"gwlkm-resend-transaction/repository/echanneltransrepo"
 )
@@ -19,9 +18,9 @@ func NewEchanneltransUsecase() EchanneltransUsecase {
 
 func (e *eChanneltransUsecase) ChangeResponseCode(payload web.ChangeResponseCode) (er error) {
 
-	if (payload.Stan == "") || (payload.RC == "") {
-		return err.FieldMustBeExist
-	}
+	// if (payload.Stan == "") || (payload.RC == "") {
+	// 	return err.FieldMustBeExist
+	// }
 
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
 	er = dataRepo.ChangeResponseCode(payload.RC, payload.Stan, 0)
@@ -33,9 +32,9 @@ func (e *eChanneltransUsecase) ChangeResponseCode(payload web.ChangeResponseCode
 
 func (e *eChanneltransUsecase) UpdateIsoMsg(payload web.UpdateIsoMsg) (er error) {
 
-	if (payload.Iso_Msg == "") || (payload.Stan == "") {
-		return err.FieldMustBeExist
-	}
+	// if (payload.Iso_Msg == "") || (payload.Stan == "") {
+	// 	return err.FieldMustBeExist
+	// }
 
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
 	er = dataRepo.UpdateIsoMsg(payload.Iso_Msg, payload.Stan)

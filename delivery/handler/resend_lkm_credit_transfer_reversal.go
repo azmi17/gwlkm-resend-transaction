@@ -15,7 +15,14 @@ func ResendLkmTransferSMprematureRevOnCre(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
 	payload := web.StanFilter{}
-	httpio.Bind(&payload)
+	rerr := httpio.BindWithErr(&payload)
+	if rerr != nil {
+		errors := helper.FormatValidationError(rerr)
+		errorMesage := gin.H{"errors": errors}
+		response := helper.ApiResponse("Resend TINTCR reversal failed", http.StatusUnprocessableEntity, "failed", errorMesage)
+		httpio.Response(http.StatusUnprocessableEntity, response)
+		return
+	}
 
 	usecase := usecase.NewRetransactionUsecase()
 	er := usecase.ResendLkmTransferSMprematureRevOnCre(payload.Stan)

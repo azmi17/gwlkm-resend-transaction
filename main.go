@@ -2,6 +2,7 @@ package main
 
 import (
 	"gwlkm-resend-transaction/delivery"
+	"gwlkm-resend-transaction/delivery/handler"
 	"gwlkm-resend-transaction/delivery/router"
 	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/repository/databasefactory"
@@ -17,6 +18,9 @@ import (
 )
 
 func main() {
+	// Temporary Functions
+	go handler.RepostingSchedulerRepoObserver()
+
 	go delivery.PrintoutObserver()
 	router.Start()
 }
@@ -36,19 +40,9 @@ func init() {
 func LoadConfiguration(isReload bool) {
 	var er error
 	if isReload {
-		_ = glg.Log("=================Service Info===================")
-		_ = glg.Log("Application Name:", helper.AppName)
-		_ = glg.Log("Application Version:", helper.AppVersion)
-		_ = glg.Log("Last Build:", helper.LastBuild)
-		_ = glg.Log("================================================")
 		_ = glg.Log("Reloading configuration file...")
 		er = godotenv.Overload(".env")
 	} else {
-		_ = glg.Log("=================Service Info===================")
-		_ = glg.Log("Application Name:", helper.AppName)
-		_ = glg.Log("Application Version:", helper.AppVersion)
-		_ = glg.Log("Last Build:", helper.LastBuild)
-		_ = glg.Log("================================================")
 		_ = glg.Log("Loading configuration file...")
 		er = godotenv.Load(".env")
 	}
@@ -78,6 +72,12 @@ func LoadConfiguration(isReload bool) {
 		SetMode(glg.BOTH).
 		AddLevelWriter(glg.ERR, logEr).
 		AddLevelWriter(glg.WARN, logEr)
+
+	_ = glg.Log("=================Service Info===================")
+	_ = glg.Log("Application Name:", helper.AppName)
+	_ = glg.Log("Application Version:", helper.AppVersion)
+	_ = glg.Log("Last Build:", helper.LastBuild)
+	_ = glg.Log("================================================")
 }
 
 func PrepareDatabase() {

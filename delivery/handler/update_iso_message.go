@@ -4,6 +4,7 @@ import (
 	"gwlkm-resend-transaction/delivery/handler/httpio"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/entities/web"
+	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/usecase"
 	"net/http"
 
@@ -12,18 +13,17 @@ import (
 
 func UpdateIsoMsg(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
-	payload := web.UpdateIsoMsg{}
-	httpio.Bind(&payload)
-	// err := httpio.BindWithErr(payload)
-	// err := ctx.ShouldBind(&payload)
-	// if err != nil {
-	// 	errors := helper.FormatValidationError(err)
-	// 	errorMesage := gin.H{"errors": errors}
 
-	// 	response := helper.ApiResponse("Failed to update", http.StatusUnprocessableEntity, "failed", errorMesage)
-	// 	ctx.JSON(http.StatusUnprocessableEntity, response)
-	// 	return
-	// }
+	payload := web.UpdateIsoMsg{}
+	rerr := httpio.BindWithErr(&payload)
+	if rerr != nil {
+		errors := helper.FormatValidationError(rerr)
+		errorMesage := gin.H{"errors": errors}
+		response := helper.ApiResponse("Update iso message failed", http.StatusUnprocessableEntity, "failed", errorMesage)
+		httpio.Response(http.StatusUnprocessableEntity, response)
+		return
+	}
+
 	usecase := usecase.NewEchanneltransUsecase()
 	er := usecase.UpdateIsoMsg(payload)
 	resp := web.RetransResponse{}

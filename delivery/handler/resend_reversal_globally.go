@@ -15,10 +15,17 @@ func ResendReversalGwlkm(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
 	payload := web.StanFilter{}
-	httpio.Bind(&payload)
+	rerr := httpio.BindWithErr(&payload)
+	if rerr != nil {
+		errors := helper.FormatValidationError(rerr)
+		errorMesage := gin.H{"errors": errors}
+		response := helper.ApiResponse("Resend reversal gwlkm transaction failed", http.StatusUnprocessableEntity, "failed", errorMesage)
+		httpio.Response(http.StatusUnprocessableEntity, response)
+		return
+	}
 
 	usecase := usecase.NewRetransactionUsecase()
-	er := usecase.ResendReversalBeforeRecycleGwlkmTrx(payload.Stan)
+	er := usecase.ResendReversalGwlkmTransaction(payload.Stan)
 
 	resp := web.RetransResponse{}
 	if er != nil {
@@ -30,7 +37,7 @@ func ResendReversalGwlkm(ctx *gin.Context) {
 		}
 	} else {
 		resp.ResponseCode = "0000"
-		resp.ResponseMessage = "Resend reversal succeeded"
+		resp.ResponseMessage = "Resend reversal gwlkm succeeded"
 	}
 	httpio.Response(http.StatusOK, resp)
 }

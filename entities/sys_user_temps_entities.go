@@ -20,7 +20,7 @@ type SysDaftarUser struct {
 }
 
 type KodeLKMFilter struct {
-	KodeLkm string `form:"kode_lkm"`
+	KodeLkm string `form:"kode_lkm" binding:"required"`
 }
 
 type ResetApexPwdResponse struct {

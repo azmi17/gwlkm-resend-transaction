@@ -4,6 +4,7 @@ import (
 	"gwlkm-resend-transaction/delivery/handler/httpio"
 	"gwlkm-resend-transaction/entities"
 	"gwlkm-resend-transaction/entities/err"
+	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/usecase"
 	"net/http"
 
@@ -17,7 +18,14 @@ func ResetApexPassword(ctx *gin.Context) {
 
 	// Call Payload and binding form
 	payload := entities.KodeLKMFilter{}
-	httpio.Bind(&payload)
+	rerr := httpio.BindWithErr(&payload)
+	if rerr != nil {
+		errors := helper.FormatValidationError(rerr)
+		errorMesage := gin.H{"errors": errors}
+		response := helper.ApiResponse("Reset apex user web password failed", http.StatusUnprocessableEntity, "failed", errorMesage)
+		httpio.Response(http.StatusUnprocessableEntity, response)
+		return
+	}
 
 	usecase := usecase.NewSysUserUsecase()
 	lkmPwd, er := usecase.ResetSysUserPassword(payload)

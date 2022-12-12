@@ -7,12 +7,16 @@ import (
 	"gwlkm-resend-transaction/repository/apextransrepo"
 	"gwlkm-resend-transaction/repository/echanneltransrepo"
 	"time"
+
+	"github.com/kpango/glg"
 )
 
 type ApexTransUsecase interface {
 	GetTabtransListApx(kuitansi string) ([]web.TabtransInfoApx, error)
 	GetTabtransListByStanApx(stan string) ([]web.TabtransInfoApx, error)
 	RecreateSuccessTransactionApx(request web.RecreateApexRequest) error
+
+	RepostingSaldoApexByScheduler() (er error) // Temporary Functions
 }
 
 type apextransUsecase struct{}
@@ -86,4 +90,22 @@ func (a *apextransUsecase) RecreateSuccessTransactionApx(request web.RecreateApe
 	}
 
 	return
+}
+
+// Temporary Functions
+func (a *apextransUsecase) RepostingSaldoApexByScheduler() (er error) {
+	repo, _ := apextransrepo.NewApexTransRepo()
+
+	list, er := repo.GetRekeningLKMByStatusActive()
+	if er != nil {
+		return er
+	}
+
+	_ = glg.Log("Reposting saldo apex is processing..")
+	er = repo.RepostingSaldoOnRekeningLKMByScheduler(list...)
+	if er != nil {
+		return er
+	}
+
+	return nil
 }
