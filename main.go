@@ -73,6 +73,12 @@ func LoadConfiguration(isReload bool) {
 		AddLevelWriter(glg.ERR, logEr).
 		AddLevelWriter(glg.WARN, logEr)
 
+	//Untuk error jika terdapat gagal reposting menggunakan flag FAIL
+	repostinglogEr := glg.FileWriter("log/repostings.err", 0666)
+	glg.Get().
+		SetMode(glg.BOTH).
+		AddLevelWriter(glg.FAIL, repostinglogEr)
+
 	_ = glg.Log("=================Service Info===================")
 	_ = glg.Log("Application Name:", helper.AppName)
 	_ = glg.Log("Application Version:", helper.AppVersion)

@@ -242,12 +242,12 @@ func (a *ApexTransRepoMysqlImpl) GetTabtransListApx(kuitansi string) (listTx []w
 		DATE_FORMAT(tgl_trans, "%d/%m/%Y") AS tgl_trans,
 		no_rekening,
 		kode_trans,
-		pay_idpel,
-		kuitansi,
+		COALESCE(pay_idpel, '') AS pay_idpel,
+		COALESCE(kuitansi, '') AS kuitansi,
 		pokok,
-		keterangan,
-		pay_product_code,
-		pay_biller_code,
+		COALESCE(keterangan, '') AS keterangan,
+		COALESCE(pay_product_code, '') AS pay_product_code,
+		COALESCE(pay_biller_code, '') AS pay_biller_code,
 		userid
 	FROM tabtrans WHERE kuitansi = ?`, kuitansi)
 	if er != nil {
@@ -419,12 +419,12 @@ func (a *ApexTransRepoMysqlImpl) GetTabtransListByStanApx(stan string) (listTx [
 		DATE_FORMAT(tgl_trans, "%d/%m/%Y") AS tgl_trans,
 		no_rekening,
 		kode_trans,
-		pay_idpel,
-		kuitansi,
+		COALESCE(pay_idpel, '') AS pay_idpel,
+		COALESCE(kuitansi, '') AS kuitansi,
 		pokok,
-		keterangan,
-		pay_product_code,
-		pay_biller_code,
+		COALESCE(keterangan, '') AS keterangan,
+		COALESCE(pay_product_code, '') AS pay_product_code,
+		COALESCE(pay_biller_code, '') AS pay_biller_code,
 		userid
 	FROM tabtrans WHERE kuitansi LIKE "%` + stan + `%"`)
 	if er != nil {

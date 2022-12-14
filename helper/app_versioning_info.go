@@ -5,5 +5,5 @@ var (
 	AppDescription = "e-Channel Retransaction API Endpoint"
 	AppVersion     = "3.3"
 	AppAuthor      = "Azmi Farhan"
-	LastBuild      = "12/12/2022 13:21"
+	LastBuild      = "12/12/2022 14:58"
 )
