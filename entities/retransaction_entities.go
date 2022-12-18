@@ -72,8 +72,9 @@ type IsoMessageBody struct {
 	SubscriberID     string // bit 103
 	ProductCode      string // bit 104
 
-	Ref_Stan string
-	Ref      string
+	Ref_Stan  string
+	Ref       string
+	LKMSource string
 }
 
 type CoreAddrInfo struct {

@@ -38,7 +38,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessag
 		return
 	}
 	isoUnMarshal.SetMti(dataTrans.MTI)
-	isoUnMarshal.SetField(3, "200700") // => 400700 extract current date (?)
+	isoUnMarshal.SetField(3, "400700") // => 400700 extract current date (?)
 	isoUnMarshal.SetField(4, isoUnMarshal.GetField(4))
 	isoUnMarshal.SetField(5, isoUnMarshal.GetField(5))
 	isoUnMarshal.SetField(6, isoUnMarshal.GetField(6))
@@ -59,7 +59,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessag
 	isoUnMarshal.SetField(61, isoUnMarshal.GetField(61))
 	isoUnMarshal.SetField(100, isoUnMarshal.GetField(100))
 	isoUnMarshal.SetField(103, isoUnMarshal.GetField(103))
-	isoUnMarshal.SetField(104, "TINTDB")
+	isoUnMarshal.SetField(104, "TEXTDB")
 
 	// MARSHAL PROCS
 	isoMsg, err := isoUnMarshal.GoMarshal()
@@ -382,4 +382,106 @@ func (r *retransactionRepoImpl) ResendReversalBeforeRecycleGwlkmTransaction(stan
 
 	entities.PrintLog(data.Msg)
 	return er
+}
+
+func (r *retransactionRepoImpl) RecycleSuspectRevBillerOnTextdbTrx(dataTrans *entities.IsoMessageBody) (er error) {
+
+	//TODO: Send ISO data to IP & Port GWLKM
+	// ISO OBJ INIT
+	iso, er := iso8583uParser.NewISO8583U()
+	if er != nil {
+		entities.PrintError("load package error", er.Error())
+		return
+	}
+
+	// UNMARSHAL | RE-COMPOSE ISO
+	er = iso.GoUnMarshal(dataTrans.Msg)
+	if er != nil {
+		entities.PrintError(er.Error())
+		return
+	}
+	iso.SetMti(dataTrans.MTI)
+	iso.SetField(3, "400700")
+	iso.SetField(12, helper.GetCurrentDate())
+	iso.SetField(104, "TEXTDB")
+
+	// MARSHAL PROCS
+	isoMsg, er := iso.GoMarshal()
+	if er != nil {
+		entities.PrintError(er.Error())
+		return
+	}
+
+	// CORE ADDRS
+	repo, _ := echanneltransrepo.NewEchannelTransRepo()
+	coreAddr, er := repo.GetServeAddr(dataTrans.BankCode)
+	if er != nil {
+		entities.PrintError(er.Error())
+	}
+
+	// INIT TCP OBJ
+	client := tcp.NewTCPClient(coreAddr.IPaddr, coreAddr.TCPPort, 45)
+	entities.PrintLog("SEND:\n", iso.PrettyPrint())
+	st := client.Send(tcp.SetHeader(isoMsg, 4))
+
+	// UNMARSHAL PROCS FROM SENDER
+	if st.Code == tcp.CONNOK {
+		er = iso.GoUnMarshal(st.Message)
+		if er != nil {
+			entities.PrintError(er.Error())
+			return
+		}
+		// Override below:
+		dataTrans.ResponseCode = iso.GetField(39)
+		dataTrans.Msg = iso.GetField(48)
+		entities.PrintLog("RECV:\n", iso.PrettyPrint())
+	} else {
+		dataTrans.Msg = fmt.Sprint("re-transaction failed: ", st.Message)
+		return errors.New(dataTrans.Msg)
+	}
+
+	// TODO: Begin Recycle apex transaction..
+	if dataTrans.ResponseCode == constant.Success || (dataTrans.ResponseCode == constant.TransactedResponseGwLKM && dataTrans.Msg == helper.AlreadyReversed) {
+		apexRepo, _ := apextransrepo.NewApexTransRepo()
+
+		// TEXTCR Reversal..
+		TEXTCR, er := apexRepo.GetPrimaryTrxBelongToRecreateApx("TEXTCR"+iso.GetField(11), "100", dataTrans.BankCode)
+		if er != nil {
+			entities.PrintError(fmt.Sprint(err.NoRecord, ", [TEXTDB only]"))
+		}
+		newTEXTCR := TEXTCR
+		newTEXTCR.No_rekening = dataTrans.LKMSource
+		newTEXTCR.Kode_trans = "290"
+		newTEXTCR.My_kode_trans = "200"
+		newTEXTCR.Keterangan = "Reversal " + TEXTCR.Keterangan
+		if er = apexRepo.DuplicateTrxBelongToRecreateApx(newTEXTCR); er != nil {
+			return er // berhenti disini jika sudah ada, kebawah tidak di eksekusi
+		}
+
+		// TEXTDB Reversal..
+		TEXTDB, er := apexRepo.GetPrimaryTrxBelongToRecreateApx("TEXTDB"+iso.GetField(11), "200", dataTrans.BankCode)
+		if er != nil {
+			entities.PrintError(fmt.Sprint(err.NoRecord, ", [TEXTCR only]"))
+		}
+		newTEXTDB := TEXTDB
+		newTEXTDB.No_rekening = dataTrans.LKMSource
+		newTEXTDB.Kode_trans = "190"
+		newTEXTDB.My_kode_trans = "100"
+		newTEXTDB.Keterangan = "Reversal " + TEXTDB.Keterangan
+		if er = apexRepo.DuplicateTrxBelongToRecreateApx(newTEXTDB); er != nil {
+			return er
+		}
+
+		// TODO: Change EMS response code..
+		trxSource, er := repo.GetOriginData(iso.GetField(11))
+		if er != nil {
+			return er
+		}
+
+		if er = repo.ChangeResponseCode("1100", trxSource.Stan, trxSource.Trans_id); er != nil {
+			return er
+		}
+
+	}
+	return nil
 }

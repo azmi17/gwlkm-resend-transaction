@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RecreateSuccessTransactionApx(ctx *gin.Context) {
+func RecreateReversalTransactionApx(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
 	payload := web.RecreateApexRequest{}
@@ -20,13 +20,13 @@ func RecreateSuccessTransactionApx(ctx *gin.Context) {
 	if rerr != nil {
 		errors := helper.FormatValidationError(rerr)
 		errorMesage := gin.H{"errors": errors}
-		response := helper.ApiResponse("Recreate apex success transaction failed", http.StatusUnprocessableEntity, "failed", errorMesage)
+		response := helper.ApiResponse("Recreate apex reversal transaction failed", http.StatusUnprocessableEntity, "failed", errorMesage)
 		httpio.Response(http.StatusUnprocessableEntity, response)
 		return
 	}
 
 	usecase := usecase.NewApexTransUsecase()
-	er := usecase.RecreateSuccessTransactionApx(payload)
+	er := usecase.RecreateReversalTransactionApx(payload)
 
 	resp := web.RetransResponse{}
 	if er != nil {
@@ -41,7 +41,7 @@ func RecreateSuccessTransactionApx(ctx *gin.Context) {
 		}
 	} else {
 		resp.ResponseCode = "0000"
-		resp.ResponseMessage = "Recreate apex success transaction succeeded"
+		resp.ResponseMessage = "Recreate apex reversal transaction succeeded"
 	}
 
 	httpio.Response(http.StatusOK, resp)

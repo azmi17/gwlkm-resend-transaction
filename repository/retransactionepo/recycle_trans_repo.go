@@ -8,4 +8,5 @@ type RetransactionRepo interface {
 	RecycleLkmTransferSMprematureRevOnCre(dataTrans *entities.IsoMessageBody) error
 	ResendReversalGwlkmTransaction(dataTrans *entities.IsoMessageBody) error
 	ResendReversalBeforeRecycleGwlkmTransaction(stan string) error
+	RecycleSuspectRevBillerOnTextdbTrx(dataTrans *entities.IsoMessageBody) error
 }

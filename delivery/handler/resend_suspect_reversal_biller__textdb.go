@@ -3,7 +3,6 @@ package handler
 import (
 	"gwlkm-resend-transaction/delivery/handler/httpio"
 	"gwlkm-resend-transaction/entities"
-	"gwlkm-resend-transaction/entities/err"
 	"gwlkm-resend-transaction/entities/web"
 	"gwlkm-resend-transaction/helper"
 	"gwlkm-resend-transaction/usecase"
@@ -12,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RecreateSuccessTransactionApx(ctx *gin.Context) {
+func RecycleSuspectRevBillerOnTextDBTrx(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
 	payload := web.RecreateApexRequest{}
@@ -20,29 +19,25 @@ func RecreateSuccessTransactionApx(ctx *gin.Context) {
 	if rerr != nil {
 		errors := helper.FormatValidationError(rerr)
 		errorMesage := gin.H{"errors": errors}
-		response := helper.ApiResponse("Recreate apex success transaction failed", http.StatusUnprocessableEntity, "failed", errorMesage)
+		response := helper.ApiResponse("Execute suspect reversal biller TEXTDB failed", http.StatusUnprocessableEntity, "failed", errorMesage)
 		httpio.Response(http.StatusUnprocessableEntity, response)
 		return
 	}
 
-	usecase := usecase.NewApexTransUsecase()
-	er := usecase.RecreateSuccessTransactionApx(payload)
+	usecase := usecase.NewRetransactionUsecase()
+	er := usecase.RecycleSuspectRevBillerOnTextdbTrx(payload)
 
 	resp := web.RetransResponse{}
 	if er != nil {
-		if er == err.NoRecord || er == err.DuplicateEntry {
-			resp.ResponseCode = "1111"
-			resp.ResponseMessage = er.Error()
-		} else {
-			entities.PrintError(er.Error())
-			entities.PrintLog(er.Error())
-			httpio.ResponseString(http.StatusInternalServerError, "internal service error")
-			return
+		entities.PrintError(er.Error())
+		resp.ResponseMessage = er.Error()
+		resp.ResponseCode = "1111"
+		if resp.ResponseMessage == helper.AlreadyReversed {
+			resp.ResponseCode = "0000"
 		}
 	} else {
 		resp.ResponseCode = "0000"
-		resp.ResponseMessage = "Recreate apex success transaction succeeded"
+		resp.ResponseMessage = "Execute suspect reversal biller TEXTDB succeeded"
 	}
-
 	httpio.Response(http.StatusOK, resp)
 }

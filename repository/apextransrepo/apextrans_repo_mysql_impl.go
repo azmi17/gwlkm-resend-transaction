@@ -343,8 +343,7 @@ func (a *ApexTransRepoMysqlImpl) GetPrimaryTrxBelongToRecreateApx(kuitansi, MyKd
 func (a *ApexTransRepoMysqlImpl) DuplicateTrxBelongToRecreateApx(copy entities.TransApx) (er error) {
 
 	apexTransRepo, _ := NewApexTransRepo()
-
-	_, er = apexTransRepo.GetPrimaryTrxBelongToRecreateApx(copy.Kuitansi, "200", copy.No_rekening)
+	_, er = apexTransRepo.GetPrimaryTrxBelongToRecreateApx(copy.Kuitansi, copy.My_kode_trans, copy.No_rekening)
 	if er != nil {
 		stmt, er := a.apexDb.Prepare(`INSERT INTO tabtrans(
 			tabtrans_id,

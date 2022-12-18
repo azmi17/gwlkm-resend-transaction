@@ -41,6 +41,9 @@ func RegisterHandler(router *gin.Engine) {
 	apiv1.POST("/resend/reversal", handler.ResendReversalGwlkm)
 	apiv1.POST("/apex/recreate", handler.RecreateSuccessTransactionApx)
 
+	apiv1.POST("/apex/reversal", handler.RecreateReversalTransactionApx)
+	apiv1.POST("/apex/suspect-reversal-biller/textdb", handler.RecycleSuspectRevBillerOnTextDBTrx)
+
 	// Temporary functions
 	apiv1.POST("/repostings/all", handler.RepostingAllByApi)
 }
