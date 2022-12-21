@@ -3,7 +3,7 @@ package helper
 var (
 	AppName        = "e-Channel Recycle Transaction"
 	AppDescription = "e-Channel Retransaction API Endpoint"
-	AppVersion     = "3.0.0"
+	AppVersion     = "3.0.1"
 	AppAuthor      = "Azmi Farhan"
-	LastBuild      = "18/12/2022 18:14"
+	LastBuild      = "21/12/2022 09:53"
 )

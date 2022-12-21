@@ -14,10 +14,11 @@ var (
 // Status Code Tx
 var (
 	// Ems status
-	Success = "0000"
-	Suspect = "1235"
-	Pending = "1234"
-	Resend  = "1700"
+	Success               = "0000"
+	Suspect               = "1235"
+	Pending               = "1234"
+	Resend                = "1700"
+	SuspectReversalBiller = "3300"
 
 	// Response from gwlkm
 	TransactedResponseGwLKM = "0044"

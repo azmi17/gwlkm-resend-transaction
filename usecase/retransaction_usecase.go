@@ -17,7 +17,7 @@ type RetransactionUsecase interface {
 	GetRetransTxInfo(stan string) (web.RetransTxInfo, error)
 	ResendLkmTransferSMprematureRevOnCre(string) (er error)
 	ResendReversalGwlkmTransaction(string) (er error)
-	RecycleSuspectRevBillerOnTextdbTrx(web.RecreateApexRequest) (er error)
+	RecycleSuspectRevBiller(web.SuspectRevBiller) (er error)
 }
 
 type retransactionUsecase struct{}
@@ -170,7 +170,7 @@ func (r *retransactionUsecase) ResendReversalGwlkmTransaction(stan string) (er e
 	}
 }
 
-func (r *retransactionUsecase) RecycleSuspectRevBillerOnTextdbTrx(payload web.RecreateApexRequest) (er error) {
+func (r *retransactionUsecase) RecycleSuspectRevBiller(payload web.SuspectRevBiller) (er error) {
 
 	dataRepo, _ := echanneltransrepo.NewEchannelTransRepo()
 	var data entities.IsoMessageBody
@@ -178,9 +178,12 @@ func (r *retransactionUsecase) RecycleSuspectRevBillerOnTextdbTrx(payload web.Re
 		return er
 	}
 
-	data.LKMSource = payload.KodeLKM // assign LKMSoruce (Untuk handle Lembaga routing di apex..)
+	// assign payload to isoMessage struct
+	data.LKMSource = payload.KodeLKM
+	data.ProductCode = payload.ProductCode
+
 	reTransRepo := retransactionepo.NewRetransactionRepo()
-	reTransRepo.RecycleSuspectRevBillerOnTextdbTrx(&data)
+	reTransRepo.RecycleSuspectRevBiller(&data)
 	if data.ResponseCode != constant.Success {
 		return errors.New(data.Msg)
 	} else {

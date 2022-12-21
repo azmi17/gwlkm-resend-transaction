@@ -11,21 +11,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RecycleSuspectRevBillerOnTextDBTrx(ctx *gin.Context) {
+func RecycleSuspectRevBiller(ctx *gin.Context) {
 	httpio := httpio.NewRequestIO(ctx)
 
-	payload := web.RecreateApexRequest{}
+	payload := web.SuspectRevBiller{}
 	rerr := httpio.BindWithErr(&payload)
 	if rerr != nil {
 		errors := helper.FormatValidationError(rerr)
 		errorMesage := gin.H{"errors": errors}
-		response := helper.ApiResponse("Execute suspect reversal biller TEXTDB failed", http.StatusUnprocessableEntity, "failed", errorMesage)
+		response := helper.ApiResponse("Execute suspect reversal biller failed", http.StatusUnprocessableEntity, "failed", errorMesage)
 		httpio.Response(http.StatusUnprocessableEntity, response)
 		return
 	}
 
 	usecase := usecase.NewRetransactionUsecase()
-	er := usecase.RecycleSuspectRevBillerOnTextdbTrx(payload)
+	er := usecase.RecycleSuspectRevBiller(payload)
 
 	resp := web.RetransResponse{}
 	if er != nil {
@@ -37,7 +37,7 @@ func RecycleSuspectRevBillerOnTextDBTrx(ctx *gin.Context) {
 		}
 	} else {
 		resp.ResponseCode = "0000"
-		resp.ResponseMessage = "Execute suspect reversal biller TEXTDB succeeded"
+		resp.ResponseMessage = "Execute suspect reversal biller succeeded"
 	}
 	httpio.Response(http.StatusOK, resp)
 }

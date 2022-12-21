@@ -122,7 +122,6 @@ func (a *apextransUsecase) RecreateReversalTransactionApx(request web.RecreateAp
 	trans.Pay_idpel = trxSource.Subscriber_Id
 	trans.Pay_biller_code = trxSource.Biller_Code
 	trans.Pay_product_code = trxSource.Product_Code
-
 	if er = apxRepo.DuplicateTrxBelongToRecreateApx(trans); er != nil {
 		return er
 	}

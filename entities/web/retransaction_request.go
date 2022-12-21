@@ -9,6 +9,12 @@ type RecreateApexRequest struct {
 	Stan    string `form:"stan" binding:"required"`
 }
 
+type SuspectRevBiller struct {
+	KodeLKM     string `form:"kode_lkm" binding:"required"`
+	Stan        string `form:"stan" binding:"required"`
+	ProductCode string `form:"product_code" binding:"required"`
+}
+
 type KuitansiFilter struct {
 	Kuitansi string `form:"kuitansi"`
 }

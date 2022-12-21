@@ -384,7 +384,7 @@ func (r *retransactionRepoImpl) ResendReversalBeforeRecycleGwlkmTransaction(stan
 	return er
 }
 
-func (r *retransactionRepoImpl) RecycleSuspectRevBillerOnTextdbTrx(dataTrans *entities.IsoMessageBody) (er error) {
+func (r *retransactionRepoImpl) RecycleSuspectRevBiller(dataTrans *entities.IsoMessageBody) (er error) {
 
 	//TODO: Send ISO data to IP & Port GWLKM
 	// ISO OBJ INIT
@@ -403,7 +403,7 @@ func (r *retransactionRepoImpl) RecycleSuspectRevBillerOnTextdbTrx(dataTrans *en
 	iso.SetMti(dataTrans.MTI)
 	iso.SetField(3, "400700")
 	iso.SetField(12, helper.GetCurrentDate())
-	iso.SetField(104, "TEXTDB")
+	iso.SetField(104, dataTrans.ProductCode)
 
 	// MARSHAL PROCS
 	isoMsg, er := iso.GoMarshal()
