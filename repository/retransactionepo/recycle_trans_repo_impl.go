@@ -46,7 +46,7 @@ func (r *retransactionRepoImpl) RecycleTransaction(dataTrans *entities.IsoMessag
 	isoUnMarshal.SetField(8, isoUnMarshal.GetField(8))
 	isoUnMarshal.SetField(11, isoUnMarshal.GetField(11))
 	isoUnMarshal.SetField(12, isoUnMarshal.GetField(12))
-	isoUnMarshal.SetField(13, helper.GETMMDD[4:8])
+	isoUnMarshal.SetField(13, isoUnMarshal.GetField(13))
 	isoUnMarshal.SetField(18, isoUnMarshal.GetField(18))
 	isoUnMarshal.SetField(26, isoUnMarshal.GetField(26))
 	isoUnMarshal.SetField(32, isoUnMarshal.GetField(32))
@@ -144,7 +144,7 @@ func (r *retransactionRepoImpl) RecycleGwlkmTransaction(dataTrans *entities.IsoM
 	iso.SetField(3, dataTrans.ProcessingCode)
 	iso.SetField(11, dataTrans.Stan)
 	iso.SetField(12, helper.GetCurrentDate())
-	iso.SetField(13, helper.GETMMDD[4:8])
+	iso.SetField(13, iso.GetField(13))
 
 	// MARSHAL PROCS
 	isoMsg, err := iso.GoMarshal()
